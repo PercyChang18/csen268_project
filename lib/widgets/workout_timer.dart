@@ -25,12 +25,18 @@ class _WorkoutTimerState extends State<WorkoutTimer> {
   }
 
   @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Text(
           '$minutes:$seconds',
-          style: TextStyle(fontSize: 20, color: Color(0xFFFF9100)),
+          style: TextStyle(fontSize: 30, color: Color(0xFFFF9100)),
         ),
         SizedBox(height: 10),
         SizedBox(
@@ -52,14 +58,18 @@ class _WorkoutTimerState extends State<WorkoutTimer> {
 
               Center(
                 child: IconButton(
-                  iconSize: 75,
+                  iconSize: 70,
                   style: IconButton.styleFrom(
                     shape: CircleBorder(),
                     backgroundColor: Color(0xFFFF9100),
                     foregroundColor: Color(0xFF3B3B3B),
                   ),
                   onPressed: () {
-                    startTimer();
+                    if (isPaused) {
+                      startTimer();
+                    } else {
+                      stopTimer();
+                    }
                   },
                   icon: isPaused ? Icon(Icons.play_arrow) : Icon(Icons.pause),
                 ),
@@ -72,6 +82,7 @@ class _WorkoutTimerState extends State<WorkoutTimer> {
   }
 
   void startTimer() {
+    timer?.cancel();
     isPaused = !isPaused;
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (currentSeconds > 0) {
@@ -81,5 +92,11 @@ class _WorkoutTimerState extends State<WorkoutTimer> {
         setState(() {});
       }
     });
+  }
+
+  void stopTimer() {
+    timer?.cancel();
+    isPaused = true;
+    setState(() {});
   }
 }
