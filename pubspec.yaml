@@ -43,8 +43,9 @@ dependencies:
   firebase_app_installations: ^0.3.2+6
   firebase_in_app_messaging: ^0.8.1+6
   cloud_firestore: ^5.6.8
-  table_calendar: ^3.2.0
+  table_calendar: ^3.1.3
   firebase_auth: ^5.5.4
+  firebase_ui_auth: ^1.16.0
 
 dev_dependencies:
   flutter_test:
