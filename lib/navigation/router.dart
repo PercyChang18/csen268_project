@@ -39,12 +39,12 @@ GoRouter router(dynamic authenticationBloc) {
     initialLocation: '/home',
     refreshListenable: StreamToListenable([authenticationBloc.stream]),
     redirect: (context, state) async {
-      if (authenticationBloc.state is AuthenticationLoggedOut &&
+      if (authenticationBloc.state is AuthenticationNotSignedInState &&
           (!(state.fullPath?.startsWith("/login") ?? false))) {
         return "/login";
       } else {
         if ((state.fullPath?.startsWith("/login") ?? false) &&
-            authenticationBloc.state is AuthenticationLoggedIn) {
+            authenticationBloc.state is AuthenticationSignedInState) {
           return "/home";
         }
       }
