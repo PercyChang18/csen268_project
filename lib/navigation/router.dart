@@ -1,20 +1,22 @@
 import 'package:csen268_project/bloc/authentication_bloc.dart';
 import 'package:csen268_project/model/workout.dart';
-import 'package:csen268_project/page/home_page.dart';
-import 'package:csen268_project/page/log_page.dart';
-import 'package:csen268_project/page/personal_info_page.dart';
-import 'package:csen268_project/page/start_workout_page.dart';
-import 'package:csen268_project/page/welcome_page.dart';
+import 'package:csen268_project/pages/end_workout_page.dart';
+import 'package:csen268_project/pages/log_page.dart';
+import 'package:csen268_project/pages/personal_info_page.dart';
+import 'package:csen268_project/pages/start_workout_page.dart';
+import 'package:csen268_project/pages/welcome_page.dart';
+import 'package:csen268_project/pages/workout_home_page.dart';
 import 'package:csen268_project/utilities/stream_to_listenable.dart';
 import 'package:csen268_project/widgets/scaffold_with_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../page/login_page.dart';
-import '../page/signup_page.dart';
+import '../pages/login_page.dart';
+import '../pages/signup_page.dart';
 
 class RouteName {
   static const home = 'home';
+  // main is just a name for routing logic
   static const main = 'main';
   static const log = 'log';
   static const startWorkout = 'startWorkout';
@@ -72,7 +74,7 @@ GoRouter router(dynamic authenticationBloc) {
         path: '/',
         name: RouteName.main,
         builder: (context, state) {
-          return const HomePage();
+          return const WorkoutHomePage();
         },
         routes: [
           ShellRoute(
@@ -84,7 +86,7 @@ GoRouter router(dynamic authenticationBloc) {
               GoRoute(
                 path: 'home',
                 name: RouteName.home,
-                builder: (context, state) => const HomePage(),
+                builder: (context, state) => const WorkoutHomePage(),
                 routes: [
                   GoRoute(
                     path: 'startWorkout',
@@ -96,6 +98,18 @@ GoRouter router(dynamic authenticationBloc) {
                         print("No workout");
                       }
                       return StartWorkoutPage(workout: workout!);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'endtWorkout',
+                    name: RouteName.endWorkout,
+                    parentNavigatorKey: rootNavigatorKey,
+                    builder: (context, state) {
+                      final Workout? workout = state.extra as Workout?;
+                      if (workout == null) {
+                        print("No workout");
+                      }
+                      return EndWorkoutPage(workout: workout!);
                     },
                   ),
                   GoRoute(

@@ -6,43 +6,59 @@ class Workout {
   final String startImage;
   final String endImage;
   final String description;
+  final int duration;
+  final int calories;
+  bool isCompleted;
 
   Workout({
     required this.title,
     required this.startImage,
     required this.endImage,
     required this.description,
+    required this.duration,
+    required this.calories,
+    this.isCompleted = false,
   });
 
   Workout copyWith({
-    String? workoutName,
+    String? title,
     String? startImage,
     String? endImage,
     String? description,
+    int? duration,
+    int? calories,
+    bool? isCompleted,
   }) {
     return Workout(
-      title: workoutName ?? this.title,
+      title: title ?? this.title,
       startImage: startImage ?? this.startImage,
       endImage: endImage ?? this.endImage,
       description: description ?? this.description,
+      duration: duration ?? this.duration,
+      calories: calories ?? this.calories,
+      isCompleted: isCompleted ?? this.isCompleted,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'workoutName': title,
+      'title': title,
       'startImage': startImage,
       'endImage': endImage,
       'description': description,
+      'duration': duration,
+      'calories': calories,
     };
   }
 
   factory Workout.fromMap(Map<String, dynamic> map) {
     return Workout(
-      title: map['workoutName'] as String,
+      title: map['title'] as String,
       startImage: map['startImage'] as String,
       endImage: map['endImage'] as String,
       description: map['description'] as String,
+      duration: map['duration'] as int,
+      calories: map['calories'] as int,
     );
   }
 
@@ -53,7 +69,7 @@ class Workout {
 
   @override
   String toString() {
-    return 'Workout(workoutName: $title, startImage: $startImage, endImage: $endImage, description: $description)';
+    return 'Workout(title: $title, startImage: $startImage, endImage: $endImage, description: $description, duration: $duration, calories: $calories)';
   }
 
   @override
@@ -63,7 +79,9 @@ class Workout {
     return other.title == title &&
         other.startImage == startImage &&
         other.endImage == endImage &&
-        other.description == description;
+        other.description == description &&
+        other.duration == duration &&
+        other.calories == calories;
   }
 
   @override
@@ -71,6 +89,8 @@ class Workout {
     return title.hashCode ^
         startImage.hashCode ^
         endImage.hashCode ^
-        description.hashCode;
+        description.hashCode ^
+        duration.hashCode ^
+        calories.hashCode;
   }
 }
