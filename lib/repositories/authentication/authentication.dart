@@ -1,29 +1,44 @@
-import '../../model/user.dart';
+import "package:firebase_auth/firebase_auth.dart" as auth;
+import 'package:csen268_project/model/auth_user.dart';
 
-abstract class AuthenticationRepository {
-  Future<User> signIn({required String email, required String password});
-}
-
-class FirebaseAuthenticationRepository extends AuthenticationRepository {
-  Future<void> someFirebaseSpecificMethod() async {
-    await Future.delayed(const Duration(seconds: 10), () {});
+class AuthenticationRepository {
+  AuthUser getCurrentUser() {
+    auth.User? user = auth.FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return AuthUser();
+    } else {
+      return AuthUser(
+        displayName: user.displayName,
+        email: user.email,
+        imageUrl: user.photoURL,
+        uid: user.uid,
+        emailVerified: user.emailVerified,
+      );
+    }
   }
 
-  @override
-  Future<User> signIn({required String email, required String password}) async {
-    await someFirebaseSpecificMethod();
-    return User.createMockUser();
-  }
-}
-
-class OktaAuthenticationRepository extends AuthenticationRepository {
-  Future<void> someOktaSpecificMethod() async {
-    await Future.delayed(const Duration(seconds: 2), () {});
+  Future<void> signOut() async {
+    await auth.FirebaseAuth.instance.signOut();
   }
 
-  @override
-  Future<User> signIn({required String email, required String password}) async {
-    await someOktaSpecificMethod();
-    return User.createMockUser();
+  Future<void> verifyEmail() async {
+    await auth.FirebaseAuth.instance.currentUser?.sendEmailVerification();
+    await auth.FirebaseAuth.instance.signOut();
+  }
+
+  Stream<AuthUser> get authUserStream async* {
+    await for (final user in auth.FirebaseAuth.instance.authStateChanges()) {
+      if (user == null) {
+        yield AuthUser();
+      } else {
+        yield AuthUser(
+          email: user.email,
+          uid: user.uid,
+          imageUrl: user.photoURL,
+          displayName: user.displayName,
+          emailVerified: user.emailVerified,
+        );
+      }
+    }
   }
 }
