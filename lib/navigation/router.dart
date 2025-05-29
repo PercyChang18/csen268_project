@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../pages/login_page.dart';
-import '../pages/signup_page.dart';
 
 class RouteName {
   static const home = 'home';
@@ -21,8 +20,7 @@ class RouteName {
   static const log = 'log';
   static const startWorkout = 'startWorkout';
   static const endWorkout = 'endWorkout';
-  static const signup = 'signup';
-  static const login = 'login';
+  static const signIn = 'signIn';
   static const welcome = 'welcome';
   static const personalInfo = 'personalInfo';
 }
@@ -38,14 +36,14 @@ GoRouter router(dynamic authenticationBloc) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     // TODO: Change initial location to login after development
-    initialLocation: '/login',
+    initialLocation: '/signIn',
     refreshListenable: StreamToListenable([authenticationBloc.stream]),
     redirect: (context, state) async {
       if (authenticationBloc.state is AuthenticationNotSignedInState &&
-          (!(state.fullPath?.startsWith("/login") ?? false))) {
-        return "/login";
+          (!(state.fullPath?.startsWith("/signIn") ?? false))) {
+        return "/signIn";
       } else {
-        if ((state.fullPath?.startsWith("/login") ?? false) &&
+        if ((state.fullPath?.startsWith("/signIn") ?? false) &&
             authenticationBloc.state is AuthenticationSignedInState) {
           return "/home";
         }
@@ -54,16 +52,11 @@ GoRouter router(dynamic authenticationBloc) {
     },
     routes: [
       GoRoute(
-        path: '/login',
-        name: RouteName.login,
+        path: '/signIn',
+        name: RouteName.signIn,
         builder: (context, state) {
-          return const LoginPage();
+          return const SignInPage();
         },
-      ),
-      GoRoute(
-        path: '/signup',
-        name: RouteName.signup,
-        builder: (context, state) => const SignupPage(),
       ),
       GoRoute(
         path: '/welcome',
