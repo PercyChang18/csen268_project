@@ -38,7 +38,7 @@ GoRouter router(dynamic authenticationBloc) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     // TODO: Change initial location to login after development
-    initialLocation: '/home',
+    initialLocation: '/welcome',
     refreshListenable: StreamToListenable([authenticationBloc.stream]),
     redirect: (context, state) async {
       if (authenticationBloc.state is AuthenticationLoggedOut &&
