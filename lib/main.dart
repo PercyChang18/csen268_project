@@ -2,7 +2,12 @@ import 'package:csen268_project/bloc/authentication_bloc.dart';
 import 'package:csen268_project/firebase_options.dart';
 import 'package:csen268_project/model/workout.dart';
 import 'package:csen268_project/pages/cubit/workout_cubit.dart';
+import 'package:csen268_project/repositories/authentication/authentication.dart';
+import 'package:csen268_project/theme/theme.dart';
+import 'package:csen268_project/theme/theme_cubit.dart';
+
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_app_installations/firebase_app_installations.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +42,7 @@ void main() async {
   String? token;
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
+  FirebaseUIAuth.configureProviders([EmailAuthProvider()]);
   runApp(MyApp());
 }
 
@@ -47,76 +52,36 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => WorkoutCubit()..init(),
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        routerConfig: router(authenticationBloc),
-        theme: ThemeData(
-          scaffoldBackgroundColor: const Color(0xFF3B3B3B),
-          primaryColor: const Color(0xFFFF9100),
-          // cardColor: const Color(0xFF3C3C3C),
-          textTheme: const TextTheme(
-            titleLarge: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFFD5DBDC),
-            ),
-            bodyLarge: TextStyle(fontSize: 16, color: Color(0xFFD5DBDC)),
-            bodyMedium: TextStyle(fontSize: 14, color: Color(0xFFD5DBDC)),
-            bodySmall: TextStyle(fontSize: 12, color: Color(0xFFD5DBDC)),
+    return RepositoryProvider(
+      create: (context) {
+        return AuthenticationRepository();
+      },
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) {
+              return authenticationBloc..add(
+                AuthenticationInitializeEvent(
+                  authenticationRepository:
+                      RepositoryProvider.of<AuthenticationRepository>(context),
+                ),
+              );
+            },
           ),
-
-          inputDecorationTheme: const InputDecorationTheme(
-            labelStyle: TextStyle(color: Color(0xFFFF9100)),
-            hintStyle: TextStyle(color: Color(0xFFD5DBDC)),
-            border: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFFF9100)),
-            ),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFD5DBDC)),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFFF9100)),
-            ),
+          BlocProvider(create: (context) => ThemeCubit()),
+        ],
+        child: BlocListener<AuthenticationBloc, AuthenticationState>(
+          listener: (context, state) {},
+          child: BlocBuilder<ThemeCubit, ThemeState>(
+            builder: (context, state) {
+              return MaterialApp.router(
+                debugShowCheckedModeBanner: false,
+                title: 'Gym for Everyone',
+                theme: myTheme,
+                routerConfig: router(authenticationBloc),
+              );
+            },
           ),
-
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFFF9100),
-              foregroundColor: Color(0xFF3B3B3B),
-              textStyle: const TextStyle(fontWeight: FontWeight.bold),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-          ),
-
-          textButtonTheme: TextButtonThemeData(
-            style: TextButton.styleFrom(foregroundColor: Color(0xFFFF9100)),
-          ),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFF3B3B3B),
-            elevation: 0,
-            titleTextStyle: TextStyle(
-              color: Color(0xFFD5DBDC),
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-            ),
-            iconTheme: IconThemeData(color: Color(0xFFD5DBDC)),
-          ),
-          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-            backgroundColor: Color(0xFF3B3B3B),
-            selectedIconTheme: IconThemeData(
-              size: 30,
-              color: Color(0xFFFF9100),
-            ),
-            unselectedIconTheme: IconThemeData(
-              size: 30,
-              color: Color(0xFFD5DBDC),
-            ),
-            selectedItemColor: Color(0xFFFF9100),
-            unselectedItemColor: Color(0xFFD5DBDC),
-          ),
-          iconTheme: IconThemeData(color: Color(0xFFFF9100), size: 35),
         ),
       ),
     );

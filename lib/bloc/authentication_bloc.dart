@@ -87,7 +87,6 @@ class AuthenticationBloc
 
   void verifyEmail(event, emit) {
     emit(AuthenticationVerifyEmailState());
-    // no need email argument here
     authenticationRepository.verifyEmail();
   }
 

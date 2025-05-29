@@ -1,3 +1,5 @@
+import 'package:csen268_project/bloc/authentication_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +14,9 @@ class SignInPage extends StatelessWidget {
         providers: [EmailAuthProvider()],
         actions: [
           AuthStateChangeAction<SignedIn>((context, state) {
-            // do we need to add anything here?
+            BlocProvider.of<AuthenticationBloc>(
+              context,
+            ).add(AuthenticationSignedInEvent());
           }),
         ],
       ),

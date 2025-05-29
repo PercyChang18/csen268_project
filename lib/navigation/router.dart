@@ -11,7 +11,7 @@ import 'package:csen268_project/widgets/scaffold_with_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../pages/login_page.dart';
+import '../pages/sign_in_page.dart';
 
 class RouteName {
   static const home = 'home';
@@ -35,7 +35,6 @@ final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>(
 GoRouter router(dynamic authenticationBloc) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    // TODO: Change initial location to login after development
     initialLocation: '/signIn',
     refreshListenable: StreamToListenable([authenticationBloc.stream]),
     redirect: (context, state) async {
