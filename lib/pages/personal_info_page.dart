@@ -317,7 +317,8 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFFD5DBDC),
                           ),
-                          onPressed: () => context.goNamed(RouteName.login),
+                          onPressed: () => context.goNamed(RouteName.signIn),
+                          // todo: might need updates
                           child: Text('Logout'),
                         ),
                       ],
