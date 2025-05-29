@@ -69,6 +69,7 @@ class MyApp extends StatelessWidget {
             },
           ),
           BlocProvider(create: (context) => ThemeCubit()),
+          BlocProvider(create: (context) => WorkoutCubit()..init()),
         ],
         child: BlocListener<AuthenticationBloc, AuthenticationState>(
           listener: (context, state) {},
