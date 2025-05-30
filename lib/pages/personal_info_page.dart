@@ -1,7 +1,9 @@
+import 'package:csen268_project/bloc/authentication_bloc.dart';
 import 'package:csen268_project/model/user_profile.dart';
 import 'package:csen268_project/navigation/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 class PersonalInfoPage extends StatefulWidget {
@@ -317,7 +319,11 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFFD5DBDC),
                           ),
-                          onPressed: () => context.goNamed(RouteName.signIn),
+                          onPressed: () {
+                            context.read<AuthenticationBloc>().add(
+                              AuthenticationSignOutEvent(),
+                            );
+                          },
                           // todo: might need updates
                           child: Text('Logout'),
                         ),

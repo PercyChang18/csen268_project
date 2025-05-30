@@ -35,7 +35,7 @@ final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>(
 GoRouter router(dynamic authenticationBloc) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/welcome',
+    initialLocation: '/signIn',
     refreshListenable: StreamToListenable([authenticationBloc.stream]),
     redirect: (context, state) async {
       if (authenticationBloc.state is AuthenticationNotSignedInState &&
