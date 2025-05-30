@@ -3,7 +3,6 @@ import 'package:csen268_project/navigation/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:csen268_project/theme/theme.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -15,7 +14,7 @@ class WelcomePage extends StatefulWidget {
 class _WelcomePageState extends State<WelcomePage> {
   final _formKey = GlobalKey<FormState>();
   final UserProfile _userProfile = UserProfile();
-  final List<String> genders = ['Male', 'Female'];
+  final List<String> genders = ['Male', 'Female', 'Non-binary'];
   final List<String> allPurposes = [
     'Improve Physique',
     'Boost Energy',
@@ -55,9 +54,8 @@ class _WelcomePageState extends State<WelcomePage> {
                       width: 280,
                       height: 60,
                       child: DropdownButtonFormField(
-                        // value: genders[0],
-                        // TODO: theme needs to be updated
-                        decoration: InputDecoration(hintText: "Gender"),
+                        dropdownColor: Color(0xFF3B3B3B),
+                        decoration: InputDecoration(labelText: "Gender"),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please select your gender';
@@ -116,6 +114,7 @@ class _WelcomePageState extends State<WelcomePage> {
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
+                            // TODO: allow ' and ''
                             RegExp(r'^\d+\.?\d*'),
                           ),
                         ],

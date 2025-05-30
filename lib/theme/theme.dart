@@ -1,9 +1,11 @@
+import 'package:csen268_project/services/mock.dart';
 import 'package:flutter/material.dart';
 
 final ThemeData myTheme = ThemeData(
   textSelectionTheme: TextSelectionThemeData(cursorColor: Color(0xFFFF9100)),
   scaffoldBackgroundColor: const Color(0xFF3B3B3B),
   primaryColor: const Color(0xFFFF9100),
+  dropdownMenuTheme: DropdownMenuThemeData(),
   textTheme: const TextTheme(
     titleLarge: TextStyle(
       fontSize: 22,
