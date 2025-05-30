@@ -44,7 +44,7 @@ GoRouter router(dynamic authenticationBloc) {
       } else {
         if ((state.fullPath?.startsWith("/signIn") ?? false) &&
             authenticationBloc.state is AuthenticationSignedInState) {
-          return "/home";
+          return "/welcome";
         }
       }
       return null;

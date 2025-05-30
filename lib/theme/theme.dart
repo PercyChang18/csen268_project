@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 final ThemeData myTheme = ThemeData(
+  textSelectionTheme: TextSelectionThemeData(cursorColor: Color(0xFFFF9100)),
   scaffoldBackgroundColor: const Color(0xFF3B3B3B),
   primaryColor: const Color(0xFFFF9100),
   textTheme: const TextTheme(
@@ -39,8 +40,8 @@ final ThemeData myTheme = ThemeData(
       color: Color(0xFFD5DBDC),
     ),
   ),
-  inputDecorationTheme: const InputDecorationTheme(
-    // changes the style of the input text
+  // this is the theme for input text boxes
+  inputDecorationTheme: InputDecorationTheme(
     labelStyle: TextStyle(color: Color(0xFFD5DBDC)),
     // text style when float
     floatingLabelStyle: TextStyle(color: Color(0xFFFF9100)),
@@ -54,6 +55,11 @@ final ThemeData myTheme = ThemeData(
     focusedBorder: UnderlineInputBorder(
       borderSide: BorderSide(color: Color(0xFFFF9100)),
     ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8.0),
+      borderSide: const BorderSide(color: Color(0xFFFF9100), width: 1.0),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(

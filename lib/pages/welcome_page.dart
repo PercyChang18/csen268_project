@@ -3,6 +3,7 @@ import 'package:csen268_project/navigation/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:csen268_project/theme/theme.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -29,39 +30,6 @@ class _WelcomePageState extends State<WelcomePage> {
     'Resistance Bands',
   ];
 
-  InputDecoration _inputDecoration(String hintText) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: TextStyle(color: Color(0xFF3B3B3B)),
-      filled: true,
-      fillColor: Color(0xFFDEE3E5), // Background color of the input field
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide.none, // No border line
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: const BorderSide(color: Color(0xFFFF9100), width: 1.0),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: const BorderSide(color: Color(0xFFFF9100), width: 1.0),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: const BorderSide(color: Color(0xFFFF9100), width: 1.0),
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 12.0,
-        vertical: 8.0,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,13 +51,13 @@ class _WelcomePageState extends State<WelcomePage> {
                       style: TextStyle(fontSize: 32),
                     ),
                     SizedBox(height: 12),
-                    // Gender
                     SizedBox(
                       width: 280,
                       height: 60,
                       child: DropdownButtonFormField(
                         // value: genders[0],
-                        decoration: _inputDecoration('Gender'),
+                        // TODO: theme needs to be updated
+                        decoration: InputDecoration(hintText: "Gender"),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please select your gender';
@@ -118,7 +86,6 @@ class _WelcomePageState extends State<WelcomePage> {
                       width: 280,
                       height: 60,
                       child: TextFormField(
-                        cursorColor: Color(0xFFFF9100),
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
@@ -126,9 +93,7 @@ class _WelcomePageState extends State<WelcomePage> {
                           ),
                         ],
                         style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration(
-                          'Weight (kg)',
-                        ), // Now using hintText
+                        decoration: InputDecoration(labelText: "Weight:"),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your weight';
@@ -155,9 +120,7 @@ class _WelcomePageState extends State<WelcomePage> {
                           ),
                         ],
                         style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration(
-                          'Height (cm)',
-                        ), // Now using hintText
+                        decoration: InputDecoration(labelText: 'Height:'),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your height';
@@ -182,9 +145,7 @@ class _WelcomePageState extends State<WelcomePage> {
                           FilteringTextInputFormatter.digitsOnly,
                         ],
                         style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration(
-                          'Age',
-                        ), // Now using hintText
+                        decoration: InputDecoration(labelText: "Age:"),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your age';
