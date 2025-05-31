@@ -43,9 +43,7 @@ class UserProfile {
       height: data?["height"],
       age: data?["age"],
       purposes: List<String>.from(data?["purpose"] ?? []),
-      availableEquipments: List<String>.from(
-        data?["availableEquipments"] ?? [],
-      ),
+      availableEquipments: List<String>.from(data?["availableEquipment"] ?? []),
     );
   }
 }
