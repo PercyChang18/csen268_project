@@ -13,8 +13,10 @@ class AuthenticationRepository {
               .collection('users')
               .doc(user.uid)
               .get();
-      bool hasCompletedWelcome =
-          userDoc.exists && (userDoc.data()?['hasCompleteWelcome'] == true);
+      bool? hasCompletedWelcome;
+      if (userDoc.exists) {
+        hasCompletedWelcome = userDoc.data()?['hasCompletedWelcome'];
+      }
       return AuthUser(
         displayName: user.displayName,
         email: user.email,
@@ -40,12 +42,22 @@ class AuthenticationRepository {
       if (user == null) {
         yield AuthUser();
       } else {
+        final userDoc =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .get();
+        bool? hasCompletedWelcome;
+        if (userDoc.exists) {
+          hasCompletedWelcome = userDoc.data()?['hasCompletedWelcome'];
+        }
         yield AuthUser(
           email: user.email,
           uid: user.uid,
           imageUrl: user.photoURL,
           displayName: user.displayName,
           emailVerified: user.emailVerified,
+          hasCompletedWelcome: hasCompletedWelcome,
         );
       }
     }

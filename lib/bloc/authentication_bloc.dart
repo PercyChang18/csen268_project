@@ -47,10 +47,8 @@ class AuthenticationBloc
     on<AuthenticationRefreshUserEvent>((event, emit) async {
       final AuthUser? refreshedUser =
           await authenticationRepository.getCurrentUser();
-      if (refreshedUser != null && !refreshedUser.isNull) {
+      if (refreshedUser != null) {
         updateUser(refreshedUser); // Use the existing updateUser logic
-      } else {
-        add(AuthenticationSignedOutEvent());
       }
     });
   }

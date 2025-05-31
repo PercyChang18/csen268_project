@@ -51,17 +51,18 @@ class _WelcomePageState extends State<WelcomePage> {
             .set(_userProfile.toFireStore(), SetOptions(merge: true));
         // set the user completed the welcome
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          "hasCompleteWelcome": true,
+          "hasCompletedWelcome": true,
         }, SetOptions(merge: true));
+        // refresh the user, and go to home screen
         if (mounted) {
           // Access the AuthenticationBloc
+          print(
+            "Navigating to home and dispatching AuthenticationRefreshUserEvent.",
+          );
+          context.goNamed("home");
           context.read<AuthenticationBloc>().add(
             AuthenticationRefreshUserEvent(),
           );
-        }
-        // If successfully saved, go to the home screen
-        if (mounted) {
-          context.goNamed("home");
         }
       } on FirebaseException catch (e) {
         print("Firebase exception, error saving the user");
