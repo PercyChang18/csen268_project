@@ -3,6 +3,8 @@ import 'package:csen268_project/navigation/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -23,11 +25,37 @@ class _WelcomePageState extends State<WelcomePage> {
     'Improve Mood',
   ];
 
-  final List<String> availableEquiqments = [
+  final List<String> availableEquipments = [
     'None (Bodyweight)',
     'Dumbells',
     'Resistance Bands',
   ];
+
+  Future<void> _saveUserProfile() async {
+    // only save if it's validated
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      final user = FirebaseAuth.instance.currentUser;
+      // should not happen, but if the user is not logged in
+      if (user == null) {
+        print("User is not logged in!");
+        return;
+      }
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set(_userProfile.toFireStore());
+        // If successfully saved, go to the home screen
+        if (mounted) {
+          context.goNamed("home");
+        }
+      } on FirebaseException catch (e) {
+        print("Firebase exception, error saving the user");
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -217,8 +245,8 @@ class _WelcomePageState extends State<WelcomePage> {
                       spacing: 8,
                       runSpacing: 8,
                       children:
-                          availableEquiqments.map((equipment) {
-                            bool isSelected = _userProfile.availableEquiqments
+                          availableEquipments.map((equipment) {
+                            bool isSelected = _userProfile.availableEquipments
                                 .contains(equipment);
                             return ChoiceChip(
                               // showCheckmark: false,
@@ -244,14 +272,14 @@ class _WelcomePageState extends State<WelcomePage> {
                               ),
                               onSelected: (value) {
                                 if (value) {
-                                  if (!_userProfile.availableEquiqments
+                                  if (!_userProfile.availableEquipments
                                       .contains(equipment)) {
-                                    _userProfile.availableEquiqments.add(
+                                    _userProfile.availableEquipments.add(
                                       equipment,
                                     );
                                   }
                                 } else {
-                                  _userProfile.availableEquiqments.remove(
+                                  _userProfile.availableEquipments.remove(
                                     equipment,
                                   );
                                 }
@@ -263,7 +291,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     SizedBox(height: 20),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () => context.goNamed(RouteName.home),
+                        onPressed: _saveUserProfile,
                         child: Text('Continue'),
                       ),
                     ),

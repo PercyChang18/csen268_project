@@ -16,7 +16,7 @@ class PersonalInfoPage extends StatefulWidget {
 class _PersonalInfoPageState extends State<PersonalInfoPage> {
   final _formKey = GlobalKey<FormState>();
   final UserProfile _userProfile = UserProfile();
-  final List<String> genders = ['Male', 'Female'];
+  final List<String> genders = ['Male', 'Female', 'Non-Binary'];
   final List<String> allPurposes = [
     'Improve Physique',
     'Boost Energy',
@@ -30,39 +30,6 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     'Dumbells',
     'Resistance Bands',
   ];
-
-  InputDecoration _inputDecoration(String hintText) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: TextStyle(color: Color(0xFF3B3B3B)),
-      filled: true,
-      fillColor: Color(0xFFDEE3E5), // Background color of the input field
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide.none, // No border line
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide.none,
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: const BorderSide(color: Color(0xFFFF9100), width: 1.0),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: const BorderSide(color: Color(0xFFFF9100), width: 1.0),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: const BorderSide(color: Color(0xFFFF9100), width: 1.0),
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 12.0,
-        vertical: 8.0,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,8 +62,9 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       width: 280,
                       height: 60,
                       child: DropdownButtonFormField(
+                        dropdownColor: Color(0xFF3B3B3B),
                         value: _userProfile.gender,
-                        decoration: _inputDecoration('Gender'),
+                        decoration: InputDecoration(labelText: 'Gender'),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please select your gender';
@@ -125,7 +93,6 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       width: 280,
                       height: 60,
                       child: TextFormField(
-                        cursorColor: Color(0xFFFF9100),
                         keyboardType: TextInputType.number,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
@@ -133,9 +100,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                           ),
                         ],
                         style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration(
-                          'Weight (kg)',
-                        ), // Now using hintText
+                        decoration: InputDecoration(labelText: 'Weight (kg)'),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your weight';
@@ -162,9 +127,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                           ),
                         ],
                         style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration(
-                          'Height (cm)',
-                        ), // Now using hintText
+                        decoration: InputDecoration(labelText: 'Height (cm)'),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your height';
@@ -189,9 +152,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                           FilteringTextInputFormatter.digitsOnly,
                         ],
                         style: const TextStyle(color: Colors.white),
-                        decoration: _inputDecoration(
-                          'Age',
-                        ), // Now using hintText
+                        decoration: InputDecoration(labelText: 'Age'),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your age';
@@ -265,7 +226,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       runSpacing: 8,
                       children:
                           availableEquiqments.map((equipment) {
-                            bool isSelected = _userProfile.availableEquiqments
+                            bool isSelected = _userProfile.availableEquipments
                                 .contains(equipment);
                             return ChoiceChip(
                               // showCheckmark: false,
@@ -291,14 +252,14 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                               ),
                               onSelected: (value) {
                                 if (value) {
-                                  if (!_userProfile.availableEquiqments
+                                  if (!_userProfile.availableEquipments
                                       .contains(equipment)) {
-                                    _userProfile.availableEquiqments.add(
+                                    _userProfile.availableEquipments.add(
                                       equipment,
                                     );
                                   }
                                 } else {
-                                  _userProfile.availableEquiqments.remove(
+                                  _userProfile.availableEquipments.remove(
                                     equipment,
                                   );
                                 }
@@ -324,7 +285,6 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                               AuthenticationSignOutEvent(),
                             );
                           },
-                          // todo: might need updates
                           child: Text('Logout'),
                         ),
                       ],
