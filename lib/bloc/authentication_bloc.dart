@@ -21,8 +21,8 @@ class AuthenticationBloc
     on<AuthenticationSignInEvent>((event, emit) {
       // manual sign in
     });
-    on<AuthenticationSignOutEvent>((event, emit) {
-      signOut(event, emit);
+    on<AuthenticationSignOutEvent>((event, emit) async {
+      await _performSignOut(event, emit);
     });
 
     on<AuthenticationSignedInEvent>((event, emit) {
@@ -48,7 +48,7 @@ class AuthenticationBloc
       final AuthUser? refreshedUser =
           await authenticationRepository.getCurrentUser();
       if (refreshedUser != null) {
-        updateUser(refreshedUser); // Use the existing updateUser logic
+        updateUser(refreshedUser);
       }
     });
   }
@@ -72,10 +72,21 @@ class AuthenticationBloc
     });
   }
 
-  void signOut(event, emit) {
+  // async version of the original sign out function
+  Future<void> _performSignOut(event, Emitter<AuthenticationState> emit) async {
+    // Emit the state immediately to give UI feedback (e.g., show a loading spinner)
     emit(AuthenticationNotSignedInState());
-    user = null;
-    authenticationRepository.signOut();
+    user = null; // Clear the local user state
+
+    try {
+      print("Attempting to sign out from Firebase...");
+      await authenticationRepository.signOut(); // Await the actual sign-out
+      print("Firebase sign out successful.");
+    } catch (e) {
+      // Handle potential errors during sign-out (e.g., network issues)
+      print("Error during Firebase sign out: $e");
+      emit(AuthenticationNotSignedInState());
+    }
   }
 
   void updateUser(AuthUser authUser) {
