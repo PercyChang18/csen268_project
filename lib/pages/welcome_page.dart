@@ -1,7 +1,9 @@
+import 'package:csen268_project/bloc/authentication_bloc.dart';
 import 'package:csen268_project/model/user_profile.dart';
 import 'package:csen268_project/navigation/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -46,7 +48,17 @@ class _WelcomePageState extends State<WelcomePage> {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
-            .set(_userProfile.toFireStore());
+            .set(_userProfile.toFireStore(), SetOptions(merge: true));
+        // set the user completed the welcome
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          "hasCompleteWelcome": true,
+        }, SetOptions(merge: true));
+        if (mounted) {
+          // Access the AuthenticationBloc
+          context.read<AuthenticationBloc>().add(
+            AuthenticationRefreshUserEvent(),
+          );
+        }
         // If successfully saved, go to the home screen
         if (mounted) {
           context.goNamed("home");

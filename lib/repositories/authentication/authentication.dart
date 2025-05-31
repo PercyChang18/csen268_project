@@ -1,18 +1,27 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:firebase_auth/firebase_auth.dart" as auth;
 import 'package:csen268_project/model/auth_user.dart';
 
 class AuthenticationRepository {
-  AuthUser getCurrentUser() {
+  Future<AuthUser?> getCurrentUser() async {
     auth.User? user = auth.FirebaseAuth.instance.currentUser;
     if (user == null) {
       return AuthUser();
     } else {
+      final userDoc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+      bool hasCompletedWelcome =
+          userDoc.exists && (userDoc.data()?['hasCompleteWelcome'] == true);
       return AuthUser(
         displayName: user.displayName,
         email: user.email,
         imageUrl: user.photoURL,
         uid: user.uid,
         emailVerified: user.emailVerified,
+        hasCompletedWelcome: hasCompletedWelcome,
       );
     }
   }

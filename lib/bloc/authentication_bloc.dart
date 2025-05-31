@@ -6,6 +6,7 @@ import 'package:csen268_project/services/mock.dart';
 import 'package:csen268_project/model/auth_user.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';
@@ -42,6 +43,16 @@ class AuthenticationBloc
     on<AuthenticationEmailVerificationScreenEvent>((event, emit) {
       emit(AuthenticationVerifyScreenState());
     });
+    // Re-fetch the current user data from the repository
+    on<AuthenticationRefreshUserEvent>((event, emit) async {
+      final AuthUser? refreshedUser =
+          await authenticationRepository.getCurrentUser();
+      if (refreshedUser != null && !refreshedUser.isNull) {
+        updateUser(refreshedUser); // Use the existing updateUser logic
+      } else {
+        add(AuthenticationSignedOutEvent());
+      }
+    });
   }
 
   late final AuthenticationRepository authenticationRepository;
@@ -76,6 +87,7 @@ class AuthenticationBloc
       uid: authUser.uid!,
       imageUrl: authUser.imageUrl ?? Mock.imageUrl(),
       emailVerified: authUser.emailVerified ?? false,
+      hasCompletedWelcome: authUser.hasCompletedWelcome ?? false,
     );
     if (user!.emailVerified == false) {
       // if not verified the email, send them to the verification screen

@@ -4,6 +4,7 @@ class AuthUser {
   String? imageUrl;
   String? uid;
   bool? emailVerified;
+  bool? hasCompletedWelcome;
 
   AuthUser({
     this.displayName,
@@ -11,6 +12,7 @@ class AuthUser {
     this.imageUrl,
     this.uid,
     this.emailVerified,
+    this.hasCompletedWelcome,
   });
 
   bool get isNull {

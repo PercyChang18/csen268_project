@@ -27,3 +27,6 @@ class AuthenticationEmailVerificationCancel extends AuthenticationEvent {}
 
 // successfully sent the email screen
 class AuthenticationEmailVerificationScreenEvent extends AuthenticationEvent {}
+
+// refresh and get new user data
+class AuthenticationRefreshUserEvent extends AuthenticationEvent {}

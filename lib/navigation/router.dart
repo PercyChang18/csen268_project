@@ -8,6 +8,7 @@ import 'package:csen268_project/pages/welcome_page.dart';
 import 'package:csen268_project/pages/workout_home_page.dart';
 import 'package:csen268_project/utilities/stream_to_listenable.dart';
 import 'package:csen268_project/widgets/scaffold_with_nav_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -32,18 +33,30 @@ final GlobalKey<NavigatorState> shellNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: "Shell",
 );
 
-GoRouter router(dynamic authenticationBloc) {
+GoRouter router(AuthenticationBloc authenticationBloc) {
   return GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/signIn',
     refreshListenable: StreamToListenable([authenticationBloc.stream]),
     redirect: (context, state) async {
-      if (authenticationBloc.state is AuthenticationNotSignedInState &&
-          (!(state.fullPath?.startsWith("/signIn") ?? false))) {
+      final authState = authenticationBloc.state;
+      final isAuthenticated = authState is AuthenticationSignedInState;
+      final isSigningIn = state.fullPath?.startsWith("/signIn") ?? false;
+      final isWelcoming = state.fullPath?.startsWith("/welcome") ?? false;
+      bool hasCompletedWelcome = false;
+      if (isAuthenticated) {
+        hasCompletedWelcome = authState.user.hasCompletedWelcome ?? false;
+      }
+      // if is not authenticated and is not at the sign in page, return sign in
+      if (!isAuthenticated && !isSigningIn) {
         return "/signIn";
-      } else {
-        if ((state.fullPath?.startsWith("/signIn") ?? false) &&
-            authenticationBloc.state is AuthenticationSignedInState) {
+      }
+      // if is authenticated, check if this is the first time user
+      if (isAuthenticated) {
+        if (isSigningIn) {
+          return hasCompletedWelcome ? "/home" : "/welcome";
+        }
+        if (!hasCompletedWelcome && !isWelcoming) {
           return "/welcome";
         }
       }
