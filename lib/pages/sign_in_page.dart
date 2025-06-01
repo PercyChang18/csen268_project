@@ -13,11 +13,11 @@ class SignInPage extends StatelessWidget {
       body: SignInScreen(
         providers: [EmailAuthProvider()],
         actions: [
-          AuthStateChangeAction<SignedIn>((context, state) {
-            BlocProvider.of<AuthenticationBloc>(
-              context,
-            ).add(AuthenticationSignedInEvent());
-          }),
+          // AuthStateChangeAction<SignedIn>((context, state) {
+          //   BlocProvider.of<AuthenticationBloc>(
+          //     context,
+          //   ).add(AuthenticationSignedInEvent());
+          // }),
           // // hopefully this will resolve the issue
           // AuthStateChangeAction<UserCreated>((context, state) {
           //   BlocProvider.of<AuthenticationBloc>(

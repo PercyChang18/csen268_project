@@ -54,6 +54,15 @@ GoRouter router(AuthenticationBloc authenticationBloc) {
       if (!isAuthenticated && !isSigningIn) {
         return "/signIn";
       }
+      // TODO: small bugs when adding email verification
+      // if (authState is AuthenticationVerifyEmailState ||
+      //     authState is AuthenticationVerifyScreenState) {
+      //   return "/emailVerification";
+      // }
+      if (isWelcoming && hasCompletedWelcome) {
+        return '/home';
+      }
+
       // if is authenticated, check if this is the first time user
       if (isAuthenticated) {
         if (isSigningIn) {
