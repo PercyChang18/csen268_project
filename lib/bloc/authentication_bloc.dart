@@ -22,7 +22,7 @@ class AuthenticationBloc
       // manual sign in
     });
     on<AuthenticationSignOutEvent>((event, emit) async {
-      await _performSignOut(event, emit);
+      signOut(event, emit);
     });
 
     on<AuthenticationSignedInEvent>((event, emit) {
@@ -72,21 +72,10 @@ class AuthenticationBloc
     });
   }
 
-  // async version of the original sign out function
-  Future<void> _performSignOut(event, Emitter<AuthenticationState> emit) async {
-    // Emit the state immediately to give UI feedback (e.g., show a loading spinner)
+  void signOut(event, emit) {
     emit(AuthenticationNotSignedInState());
-    user = null; // Clear the local user state
-
-    try {
-      print("Attempting to sign out from Firebase...");
-      await authenticationRepository.signOut(); // Await the actual sign-out
-      print("Firebase sign out successful.");
-    } catch (e) {
-      // Handle potential errors during sign-out (e.g., network issues)
-      print("Error during Firebase sign out: $e");
-      emit(AuthenticationNotSignedInState());
-    }
+    user = null;
+    authenticationRepository.signOut();
   }
 
   void updateUser(AuthUser authUser) {
@@ -98,12 +87,12 @@ class AuthenticationBloc
       emailVerified: authUser.emailVerified ?? false,
       hasCompletedWelcome: authUser.hasCompletedWelcome ?? false,
     );
-    if (user!.emailVerified == false) {
-      // if not verified the email, send them to the verification screen
-      add(AuthenticationEmailVerificationScreenEvent());
-    } else {
-      add(AuthenticationSignedInEvent());
-    }
+    // if (user!.emailVerified == false) {
+    //   // if not verified the email, send them to the verification screen
+    //   add(AuthenticationEmailVerificationScreenEvent());
+    // } else {
+    add(AuthenticationSignedInEvent());
+    // }
   }
 
   void verifyEmail(event, emit) {

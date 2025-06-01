@@ -5,18 +5,19 @@ import 'package:csen268_project/pages/log_page.dart';
 import 'package:csen268_project/pages/personal_info_page.dart';
 import 'package:csen268_project/pages/start_workout_page.dart';
 import 'package:csen268_project/pages/welcome_page.dart';
+import 'package:csen268_project/pages/verify_email_page.dart';
 import 'package:csen268_project/pages/workout_home_page.dart';
 import 'package:csen268_project/utilities/stream_to_listenable.dart';
 import 'package:csen268_project/widgets/scaffold_with_nav_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../pages/sign_in_page.dart';
 
 class RouteName {
   static const home = 'home';
-  // main is just a name for routing logic
   static const main = 'main';
   static const log = 'log';
   static const startWorkout = 'startWorkout';
@@ -24,6 +25,7 @@ class RouteName {
   static const signIn = 'signIn';
   static const welcome = 'welcome';
   static const personalInfo = 'personalInfo';
+  static const emailVerification = 'emailVerification';
 }
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>(
@@ -39,11 +41,12 @@ GoRouter router(AuthenticationBloc authenticationBloc) {
     initialLocation: '/signIn',
     refreshListenable: StreamToListenable([authenticationBloc.stream]),
     redirect: (context, state) async {
-      final authState = authenticationBloc.state;
+      final authState = BlocProvider.of<AuthenticationBloc>(context).state;
       final isAuthenticated = authState is AuthenticationSignedInState;
       final isSigningIn = state.fullPath?.startsWith("/signIn") ?? false;
       final isWelcoming = state.fullPath?.startsWith("/welcome") ?? false;
       bool hasCompletedWelcome = false;
+
       if (isAuthenticated) {
         hasCompletedWelcome = authState.user.hasCompletedWelcome ?? false;
       }
@@ -55,8 +58,7 @@ GoRouter router(AuthenticationBloc authenticationBloc) {
       if (isAuthenticated) {
         if (isSigningIn) {
           return hasCompletedWelcome ? "/home" : "/welcome";
-        }
-        if (!hasCompletedWelcome && !isWelcoming) {
+        } else if (!hasCompletedWelcome && !isWelcoming) {
           return "/welcome";
         }
       }
@@ -69,6 +71,11 @@ GoRouter router(AuthenticationBloc authenticationBloc) {
         builder: (context, state) {
           return const SignInPage();
         },
+      ),
+      GoRoute(
+        path: '/emailVerification',
+        name: RouteName.emailVerification,
+        builder: (context, state) => const VerifyEmailPage(),
       ),
       GoRoute(
         path: '/welcome',
@@ -106,7 +113,7 @@ GoRouter router(AuthenticationBloc authenticationBloc) {
                     },
                   ),
                   GoRoute(
-                    path: 'endtWorkout',
+                    path: 'endWorkout', // Corrected typo here
                     name: RouteName.endWorkout,
                     parentNavigatorKey: rootNavigatorKey,
                     builder: (context, state) {

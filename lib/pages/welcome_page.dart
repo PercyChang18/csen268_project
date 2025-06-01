@@ -59,7 +59,6 @@ class _WelcomePageState extends State<WelcomePage> {
           print(
             "Navigating to home and dispatching AuthenticationRefreshUserEvent.",
           );
-          context.goNamed("home");
           context.read<AuthenticationBloc>().add(
             AuthenticationRefreshUserEvent(),
           );

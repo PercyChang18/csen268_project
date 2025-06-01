@@ -18,6 +18,13 @@ class SignInPage extends StatelessWidget {
               context,
             ).add(AuthenticationSignedInEvent());
           }),
+          // // hopefully this will resolve the issue
+          // AuthStateChangeAction<UserCreated>((context, state) {
+          //   BlocProvider.of<AuthenticationBloc>(
+          //     context,
+          //   ).add(AuthenticationRefreshUserEvent());
+          // }
+          // ),
         ],
       ),
     );
