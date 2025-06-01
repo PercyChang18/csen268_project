@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:csen268_project/model/workout.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -11,6 +14,19 @@ class LogPage extends StatefulWidget {
 class _LogPageState extends State<LogPage> {
   DateTime? _selectedDay;
   DateTime _focusedDay = DateTime.now();
+
+  List<Workout> _dailyWorkouts = [];
+  bool _isLoadingWorkouts = false;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDay = _focusedDay;
+    _showWorkoutsForDate(_selectedDay!);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +68,7 @@ class _LogPageState extends State<LogPage> {
                 });
               }
               // TODO: use the database to show the workout for that day
-              // _showWorkoutsForDate(selectedDay);
+              _showWorkoutsForDate(selectedDay);
             },
             onPageChanged: (focusedDay) {
               _focusedDay = focusedDay;
@@ -62,12 +78,27 @@ class _LogPageState extends State<LogPage> {
           // Display workouts for the selected date here
           Expanded(
             child:
-                _selectedDay != null
-                    ? Center(
-                      child: Text(
-                        'Workouts for: ${_selectedDay!.toLocal().toIso8601String().split('T')[0]}',
-                      ),
-                    )
+                _isLoadingWorkouts
+                    ? Center(child: CircularProgressIndicator())
+                    : _selectedDay != null
+                    ? _dailyWorkouts.isEmpty
+                        ? Center(child: Text("no workout"))
+                        : Column(
+                          children: [
+                            Center(
+                              child: Text(
+                                'Workouts for: ${_selectedDay!.toLocal().toIso8601String().split('T')[0]}',
+                              ),
+                            ),
+                            // TODO: change to other display style
+                            Row(
+                              children:
+                                  _dailyWorkouts
+                                      .map((workout) => Text(workout.title))
+                                      .toList(),
+                            ),
+                          ],
+                        )
                     : const Center(
                       child: Text('Select a date to see workouts.'),
                     ),
@@ -77,7 +108,79 @@ class _LogPageState extends State<LogPage> {
     );
   }
 
-  void _showWorkoutsForDate(DateTime date) {
-    // TODO: fetch data from the database
+  Future<void> _showWorkoutsForDate(DateTime date) async {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null) {
+      setState(() {
+        _dailyWorkouts = [];
+        _isLoadingWorkouts = false;
+      });
+      print("User not logged in. Cannot fetch workouts for log page.");
+      return;
+    }
+
+    setState(() {
+      _isLoadingWorkouts = true; // Start loading
+      _dailyWorkouts = []; // Clear previous workouts
+    });
+
+    try {
+      final String dateDocId = date.toIso8601String().substring(0, 10);
+
+      final DocumentSnapshot<Map<String, dynamic>> dailyWorkoutsDoc =
+          await _firestore
+              .collection('users')
+              .doc(currentUser.uid)
+              .collection('dailyWorkouts')
+              .doc(dateDocId)
+              .get();
+      List<String> assignedWorkoutIds = [];
+      List<String> completedWorkoutIds = [];
+
+      if (dailyWorkoutsDoc.exists && dailyWorkoutsDoc.data() != null) {
+        final data = dailyWorkoutsDoc.data()!;
+        assignedWorkoutIds = List<String>.from(
+          data['assignedWorkoutIds'] ?? [],
+        );
+        completedWorkoutIds = List<String>.from(
+          data['completedWorkoutIds'] ?? [],
+        );
+      }
+
+      if (assignedWorkoutIds.isEmpty) {
+        // No workouts assigned for this day
+        setState(() {
+          _dailyWorkouts = [];
+          _isLoadingWorkouts = false;
+        });
+        return;
+      }
+
+      final QuerySnapshot<Map<String, dynamic>> assignedWorkoutsSnapshot =
+          await _firestore
+              .collection('workouts')
+              .where(FieldPath.documentId, whereIn: assignedWorkoutIds)
+              .get();
+
+      List<Workout> fetchedWorkouts =
+          assignedWorkoutsSnapshot.docs
+              .map((doc) {
+                final workout = Workout.fromFirestore(doc.id, doc.data());
+
+                final bool isCompleted = completedWorkoutIds.contains(
+                  workout.id,
+                );
+                return workout.copyWith(isCompleted: isCompleted);
+              })
+              .where((workout) => workout.isCompleted)
+              .toList();
+
+      setState(() {
+        _dailyWorkouts = fetchedWorkouts;
+        _isLoadingWorkouts = false; // Stop loading
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 }

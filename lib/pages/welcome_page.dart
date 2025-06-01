@@ -29,7 +29,7 @@ class _WelcomePageState extends State<WelcomePage> {
 
   final List<String> availableEquipments = [
     'None (Bodyweight)',
-    'Dumbells',
+    'Dumbbells',
     'Resistance Bands',
   ];
 
