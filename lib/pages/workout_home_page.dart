@@ -1,7 +1,10 @@
+// import 'package:csen268_project/model/user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csen268_project/model/workout.dart';
 import 'package:csen268_project/navigation/router.dart';
 import 'package:csen268_project/pages/cubit/workout_cubit.dart';
 import 'package:csen268_project/widgets/workout_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -14,47 +17,21 @@ class WorkoutHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final stepsToday = 7450;
-    final workoutMinutes = 18;
-    // final recommendations = [
-    //   Workout(
-    //     title: "Back",
-    //     startImage: "startImage",
-    //     endImage: "endImage",
-    //     description: "description",
-    //     duration: 5,
-    //     calories: 10,
-    //   ),
-    //   Workout(
-    //     title: "Chest",
-    //     startImage: "startImage",
-    //     endImage: "endImage",
-    //     description: "description",
-    //     duration: 5,
-    //     calories: 10,
-    //   ),
-    //   Workout(
-    //     title: "Abs",
-    //     startImage: "startImage",
-    //     endImage: "endImage",
-    //     description: "description",
-    //     duration: 5,
-    //     calories: 10,
-    //   ),
-    //   Workout(
-    //     title: "Abs",
-    //     startImage: "startImage",
-    //     endImage: "endImage",
-    //     description: "description",
-    //     duration: 5,
-    //     calories: 10,
-    //   ),
-    // ];
+
+    // Get the current user
+    final User? currentUser = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       appBar: AppBar(title: Text('🏋️ Keep it up!'), centerTitle: true),
       body: BlocBuilder<WorkoutCubit, WorkoutState>(
         builder: (context, state) {
           if (state is WorkoutsLoaded) {
+            int workoutMinutes = 0;
+            for (var workout in state.workouts) {
+              if (workout.isCompleted) {
+                workoutMinutes += workout.duration;
+              }
+            }
             return Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -102,11 +79,25 @@ class WorkoutHomePage extends StatelessWidget {
                             )
                             .toList(),
                   ),
+                  // TODO: This is just a stream builder example. Delete if not needed.
+                  // StreamBuilder<DocumentSnapshot>(
+                  //   stream:
+                  //       FirebaseFirestore.instance
+                  //           .collection('users')
+                  //           .doc(currentUser?.uid)
+                  //           .snapshots(),
+                  //   builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  //     if (snapshot.hasData) {
+                  //       return Text('Hello: ${snapshot.data.data()['height']}');
+                  //     }
+                  //     return Text('Welcome');
+                  //   },
+                  // ),
                 ],
               ),
             );
           } else {
-            return Placeholder();
+            return Center(child: CircularProgressIndicator());
           }
         },
       ),

@@ -1,6 +1,7 @@
 import 'package:csen268_project/bloc/authentication_bloc.dart';
 import 'package:csen268_project/model/user_profile.dart';
 import 'package:csen268_project/navigation/router.dart';
+import 'package:csen268_project/pages/cubit/workout_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -409,6 +410,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                                       );
                                     });
                               }
+                              context.read<WorkoutCubit>().reassign();
                               context.goNamed(RouteName.home);
                             }
                           },
