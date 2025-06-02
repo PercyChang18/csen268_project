@@ -37,7 +37,7 @@ class _LogPageState extends State<LogPage> {
           TableCalendar(
             firstDay: DateTime.utc(2025, 1, 1), // set to be this year
             lastDay: DateTime.utc(2030, 12, 31),
-            focusedDay: DateTime.now(),
+            focusedDay: _focusedDay,
             headerStyle: HeaderStyle(
               // disable the changing format button
               formatButtonVisible: false,
@@ -67,7 +67,6 @@ class _LogPageState extends State<LogPage> {
                   _focusedDay = focusedDay;
                 });
               }
-              // TODO: use the database to show the workout for that day
               _showWorkoutsForDate(selectedDay);
             },
             onPageChanged: (focusedDay) {
@@ -79,28 +78,76 @@ class _LogPageState extends State<LogPage> {
           Expanded(
             child:
                 _isLoadingWorkouts
-                    ? Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator())
                     : _selectedDay != null
-                    ? _dailyWorkouts.isEmpty
-                        ? Center(child: Text("no workout"))
-                        : Column(
-                          children: [
-                            Center(
-                              child: Text(
-                                'Workouts for: ${_selectedDay!.toLocal().toIso8601String().split('T')[0]}',
+                    ? Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // title text
+                          Text(
+                            'Completed Workouts on ${_selectedDay!.toLocal().toString().split(' ')[0]}:',
+                            style: const TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 16.0),
+                          //  handle the "no workout" case
+                          _dailyWorkouts.isEmpty
+                              ? const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: 32.0),
+                                  child: Text(
+                                    'No completed workouts recorded.',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              // display workouts in a ListView
+                              : Expanded(
+                                child: ListView.builder(
+                                  itemCount: _dailyWorkouts.length,
+                                  itemBuilder: (context, index) {
+                                    final workout = _dailyWorkouts[index];
+                                    // maybe change to our workout card latter
+                                    return Card(
+                                      elevation: 2,
+                                      color: const Color(0xFF2C2C2E),
+                                      margin: const EdgeInsets.symmetric(
+                                        vertical: 8.0,
+                                      ),
+                                      child: ListTile(
+                                        title: Text(
+                                          workout.title,
+                                          style: const TextStyle(
+                                            fontSize: 16.0,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        // also has a check mark
+                                        trailing: Icon(
+                                          Icons.check_circle,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                            // TODO: change to other display style
-                            Row(
-                              children:
-                                  _dailyWorkouts
-                                      .map((workout) => Text(workout.title))
-                                      .toList(),
-                            ),
-                          ],
-                        )
+                        ],
+                      ),
+                    )
                     : const Center(
-                      child: Text('Select a date to see workouts.'),
+                      child: Text(
+                        'Select a date to see workouts.',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
                     ),
           ),
         ],
