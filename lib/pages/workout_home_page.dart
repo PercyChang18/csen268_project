@@ -60,25 +60,27 @@ class WorkoutHomePage extends StatelessWidget {
                   SizedBox(height: 29.0),
                   Text("Workout Today", style: textTheme.titleLarge),
                   SizedBox(height: 29.0),
-                  Wrap(
-                    spacing: 31,
-                    runSpacing: 31,
-                    alignment: WrapAlignment.start,
-                    children:
-                        state.workouts
-                            .map(
-                              (workout) => InkWell(
-                                onTap: () {
-                                  context.goNamed(
-                                    RouteName.startWorkout,
-                                    extra: workout,
-                                  );
-                                },
-                                child: WorkoutCard(workout: workout),
-                              ),
-                            )
-                            .toList(),
-                  ),
+                  state.workouts.isEmpty
+                      ? Text("No workout for today!")
+                      : Wrap(
+                        spacing: 31,
+                        runSpacing: 31,
+                        alignment: WrapAlignment.start,
+                        children:
+                            state.workouts
+                                .map(
+                                  (workout) => InkWell(
+                                    onTap: () {
+                                      context.goNamed(
+                                        RouteName.startWorkout,
+                                        extra: workout,
+                                      );
+                                    },
+                                    child: WorkoutCard(workout: workout),
+                                  ),
+                                )
+                                .toList(),
+                      ),
                   // TODO: This is just a stream builder example. Delete if not needed.
                   // StreamBuilder<DocumentSnapshot>(
                   //   stream:
