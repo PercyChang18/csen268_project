@@ -21,7 +21,7 @@ class WorkoutCard extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                workout.title,
+                workout.category,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF3B3B3B),
