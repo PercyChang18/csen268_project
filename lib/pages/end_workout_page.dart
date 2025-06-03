@@ -29,7 +29,11 @@ class _EndWorkoutPageState extends State<EndWorkoutPage> {
       // 1. Update your backend (e.g., Firestore).
       // 2. Update its internal list of workouts.
       // 3. Emit a new WorkoutsLoaded state.
-      BlocProvider.of<WorkoutCubit>(context).completeWorkout(widget.workout);
+      BlocProvider.of<WorkoutCubit>(context).completeWorkout(
+        widget.workout,
+        widget.workout.duration,
+        widget.workout.calories.roundToDouble(),
+      );
     });
     minutes = (widget.workout.duration ~/ 60).toString().padLeft(2, '0');
     seconds = (widget.workout.duration % 60).toString().padLeft(2, '0');
@@ -74,7 +78,7 @@ class _EndWorkoutPageState extends State<EndWorkoutPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '${widget.workout.calories}',
+                  widget.workout.calories.toStringAsFixed(0),
                   style: const TextStyle(fontSize: 28),
                 ),
                 SizedBox(width: 12),
@@ -90,19 +94,6 @@ class _EndWorkoutPageState extends State<EndWorkoutPage> {
             const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {
-                // print(context);
-                // BlocProvider.of<WorkoutCubit>(context).completeWorkout(workout);
-                // WidgetsBinding.instance.addPostFrameCallback((_) {
-                //   print("END");
-                //   // Use addPostFrameCallback to ensure context is fully available,
-                //   // though for BlocProvider.of it's usually fine directly in initState.
-                //   BlocProvider.of<WorkoutCubit>(
-                //     context,
-                //   ).completeWorkout(workout);
-                // });
-                // BlocProvider.of<WorkoutCubit>(
-                //   context,
-                // ).completeWorkout(widget.workout);
                 context.goNamed(RouteName.home);
               },
               child: const Text('Back to Home'),

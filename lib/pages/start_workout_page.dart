@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:csen268_project/model/user_profile.dart';
 import 'package:csen268_project/model/workout.dart';
 import 'package:csen268_project/navigation/router.dart';
 import 'package:csen268_project/pages/cubit/workout_cubit.dart';
 import 'package:csen268_project/pages/end_workout_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,12 +22,17 @@ class StartWorkoutPage extends StatefulWidget {
 
 class _StartWorkoutPageState extends State<StartWorkoutPage> {
   Timer? timer;
-  int maxSeconds = 2;
-  int currentSeconds = 2;
+  int maxSeconds = 3;
+  int currentSeconds = 3;
   int workoutSeconds = 0;
+  double workoutCal = 0;
+  double unitCal = 0.0;
   bool isPaused = true;
   String minutes = "";
   String seconds = "";
+
+  UserProfile _userProfile = UserProfile();
+  User? _currentUser;
 
   // For Outrunning
   bool isGpsOn = false;
@@ -37,10 +45,44 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
   @override
   // ignore: must_call_super
   void initState() {
+    // TODO: For presentation, just set max and current seconds to 3.
+    // maxSeconds = widget.workout.duration * 60;
+    // currentSeconds = maxSeconds;
     minutes = (workoutSeconds ~/ 60).toString().padLeft(2, '0');
     seconds = (workoutSeconds % 60).toString().padLeft(2, '0');
     if (widget.workout.title == 'Outdoor Run') {
       checkGpsStatus();
+    }
+    unitCal = widget.workout.calories;
+
+    _currentUser = FirebaseAuth.instance.currentUser;
+    _loadAndSetUserProfile();
+  }
+
+  Future<void> _loadAndSetUserProfile() async {
+    if (_currentUser != null) {
+      try {
+        DocumentSnapshot<Map<String, dynamic>> userDoc =
+            // NOTE: our data is stored in the collection 'users'
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(_currentUser!.uid)
+                .get();
+
+        if (userDoc.exists && userDoc.data() != null) {
+          setState(() {
+            _userProfile = UserProfile.fromFireStore(userDoc, null);
+          });
+        }
+      } on FirebaseException catch (e) {
+        print("Error on getting data from Firestore: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load profile: ${e.message}')),
+        );
+      }
+    } else {
+      return;
+      // should not have not signed in state and able to see this page
     }
   }
 
@@ -57,7 +99,8 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
       appBar: AppBar(
         title: Text(widget.workout.title),
         centerTitle: true,
-        automaticallyImplyLeading: isPaused && currentSeconds > 0,
+        automaticallyImplyLeading:
+            isGpsOn ? !isTracking : isPaused && currentSeconds > 0,
       ),
       body:
           widget.workout.title == "Outdoor Run"
@@ -124,7 +167,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                           child: Column(
                             children: [
                               Text(
-                                "110",
+                                workoutCal.toStringAsFixed(0),
                                 style: TextStyle(
                                   fontSize: 30.0,
                                   color: Color(0xFFFF9100),
@@ -165,9 +208,11 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                                     foregroundColor: Color(0xFF3B3B3B),
                                   ),
                                   onPressed: () {
-                                    if (!isTracking) {
+                                    if (isPaused && !isTracking) {
                                       startTracking();
+                                      startTimer();
                                     } else {
+                                      stopTimer();
                                       _stopTracking();
                                     }
                                   },
@@ -194,7 +239,11 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                                       : Color(0x33D5DBDC),
                               foregroundColor: Color(0xCC4B4B4B),
                             ),
-                            onPressed: () => isPaused ? endTimer() : null,
+                            onPressed:
+                                () =>
+                                    isPaused && currentSeconds == 0
+                                        ? endTimer()
+                                        : null,
                             icon: Icon(Icons.stop),
                           ),
                         ),
@@ -299,7 +348,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                             child: Column(
                               children: [
                                 Text(
-                                  "110",
+                                  workoutCal.toStringAsFixed(0),
                                   style: TextStyle(
                                     fontSize: 30.0,
                                     color: Color(0xFFFF9100),
@@ -390,28 +439,21 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
   void startTimer() {
     timer?.cancel();
     isPaused = !isPaused;
+    double calPerSecond =
+        ((unitCal * _userProfile.weight!.toDouble()) / (200 * 60));
+    print(calPerSecond);
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      print(currentSeconds);
       if (currentSeconds > 0) {
         currentSeconds--;
       }
       workoutSeconds++;
       minutes = (workoutSeconds ~/ 60).toString().padLeft(2, '0');
       seconds = (workoutSeconds % 60).toString().padLeft(2, '0');
+
+      workoutCal += calPerSecond;
+
+      print("workout cal: $workoutCal");
       setState(() {});
-      // if (currentSeconds > 0) {
-      //   currentSeconds--;
-      //   workoutSeconds++;
-      //   minutes = (workoutSeconds ~/ 60).toString().padLeft(2, '0');
-      //   seconds = (workoutSeconds % 60).toString().padLeft(2, '0');
-      //   setState(() {});
-      // } else {
-      // timer.cancel();
-      // isPaused = true;
-      // final updatedWorkout = widget.workout.copyWith(isCompleted: true);
-      // setState(() {});
-      // _completeWorkout(updatedWorkout);
-      // }
     });
   }
 
@@ -426,6 +468,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
     isPaused = true;
     final updatedWorkout = widget.workout.copyWith(
       duration: workoutSeconds,
+      calories: workoutCal,
       isCompleted: true,
     );
     setState(() {});

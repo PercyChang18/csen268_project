@@ -9,8 +9,14 @@ final class WorkoutLoading extends WorkoutState {}
 
 final class WorkoutsLoaded extends WorkoutState {
   final List<Workout> workouts;
+  final int totalTime;
+  final double totalCal;
 
-  WorkoutsLoaded({required this.workouts});
+  WorkoutsLoaded({
+    required this.workouts,
+    required this.totalTime,
+    required this.totalCal,
+  });
 }
 
 class WorkoutsError extends WorkoutState {

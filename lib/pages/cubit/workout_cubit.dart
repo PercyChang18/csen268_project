@@ -16,14 +16,16 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   List<Workout> workouts = [];
   late StreamSubscription<User?> _authStateSubscription;
+  int totalWorkoutTime = 0;
+  double totalWorkoutCal = 0;
 
   final Set<int> _lowWorkoutDays = {
-    DateTime.monday,
+    DateTime.tuesday,
     DateTime.wednesday,
     DateTime.friday,
   };
   final Set<int> _highWorkoutDays = {
-    DateTime.monday,
+    DateTime.tuesday,
     DateTime.wednesday,
     DateTime.friday,
     DateTime.saturday,
@@ -31,11 +33,11 @@ class WorkoutCubit extends Cubit<WorkoutState> {
 
   // TODO: Complete the plans.
   final Map<int, List<String>> _lowWorkoutPlan = {
-    DateTime.monday: ["Chest", "Back"],
+    DateTime.tuesday: ["Chest", "Back"],
     DateTime.wednesday: ["Abs", "Leg"],
   };
   final Map<int, List<String>> _highWorkoutPlan = {
-    DateTime.monday: ["Chest", "Back", "Abs", "Cardio"],
+    DateTime.tuesday: ["Chest", "Back", "Abs", "Cardio"],
   };
 
   WorkoutCubit() : super(WorkoutInitial()) {
@@ -100,7 +102,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
         if (!_highWorkoutDays.contains(today.weekday)) {
           needsAssignment = false;
           print("No workout for today!");
-          emit(WorkoutsLoaded(workouts: []));
+          emit(WorkoutsLoaded(workouts: [], totalTime: 0, totalCal: 0));
           return;
         }
       } else {
@@ -108,7 +110,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
         if (!_lowWorkoutDays.contains(today.weekday)) {
           needsAssignment = false;
           print("No workout for today!");
-          emit(WorkoutsLoaded(workouts: []));
+          emit(WorkoutsLoaded(workouts: [], totalTime: 0, totalCal: 0));
           return;
         }
       }
@@ -140,6 +142,8 @@ class WorkoutCubit extends Cubit<WorkoutState> {
         if (!reassign && assignedWorkoutIds.isNotEmpty) {
           needsAssignment = false;
         }
+        totalWorkoutTime = data['totalTime'] ?? 0;
+        totalWorkoutCal = (data['totalCal'] as num?)?.toDouble() ?? 0;
       }
       if (needsAssignment) {
         print('Assigning new workouts for today...');
@@ -195,7 +199,8 @@ class WorkoutCubit extends Cubit<WorkoutState> {
           'date': Timestamp.fromDate(today),
           'assignedWorkoutIds': assignedWorkoutIds,
           'completedWorkoutIds': completedWorkoutIdsForToday,
-          // [], // Always initialize empty for a new day's assignment
+          'totalTime': totalWorkoutTime,
+          'totalCal': totalWorkoutCal,
         });
         print(
           'Workouts assigned and updated in user dailyWorkouts subcollection.',
@@ -210,7 +215,13 @@ class WorkoutCubit extends Cubit<WorkoutState> {
 
       if (assignedWorkoutIds.isEmpty) {
         workouts = [];
-        emit(WorkoutsLoaded(workouts: workouts));
+        emit(
+          WorkoutsLoaded(
+            workouts: workouts,
+            totalTime: totalWorkoutTime,
+            totalCal: totalWorkoutCal,
+          ),
+        );
         return;
       }
 
@@ -231,7 +242,13 @@ class WorkoutCubit extends Cubit<WorkoutState> {
           }).toList();
 
       print('workouts: $workouts');
-      emit(WorkoutsLoaded(workouts: List.from(workouts)));
+      emit(
+        WorkoutsLoaded(
+          workouts: List.from(workouts),
+          totalTime: totalWorkoutTime,
+          totalCal: totalWorkoutCal,
+        ),
+      );
     } catch (e) {
       print(e);
     }
@@ -246,6 +263,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     try {
       final QuerySnapshot<Map<String, dynamic>> snapshot =
           await _firestore.collection('workouts').get();
+      print("here");
       return snapshot.docs
           .map((doc) => Workout.fromFirestore(doc.id, doc.data()))
           .toList();
@@ -256,7 +274,11 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   }
 
   // Called when a workout is completed
-  Future<void> completeWorkout(Workout workout) async {
+  Future<void> completeWorkout(
+    Workout workout,
+    int workoutTime,
+    double calories,
+  ) async {
     final currentUser = _auth.currentUser;
     if (currentUser == null) {
       print("User is not logged in.");
@@ -286,15 +308,41 @@ class WorkoutCubit extends Cubit<WorkoutState> {
         print("Workout not found in local list. Cannot toggle completion.");
         return;
       }
+      DocumentSnapshot<Map<String, dynamic>> dailyWorkoutsDoc =
+          await dailyWorkoutsDocRef.get();
+
+      totalWorkoutTime =
+          (dailyWorkoutsDoc.data()!['totalTime'] as num?)?.toInt() ?? 0;
+      // print("Time: $totalWorkoutTime");
+      totalWorkoutCal =
+          (dailyWorkoutsDoc.data()!['totalCal'] as num?)?.toDouble() ?? 0;
+
+      totalWorkoutTime += workoutTime;
+      totalWorkoutCal += calories;
 
       await dailyWorkoutsDocRef.update({
         'completedWorkoutIds': FieldValue.arrayUnion([workout.id]),
       });
+
+      await dailyWorkoutsDocRef.set({
+        'totalTime': totalWorkoutTime,
+        'totalCal': totalWorkoutCal,
+      }, SetOptions(merge: true));
       // Update local state
-      workouts[index] = workouts[index].copyWith(isCompleted: true);
+      workouts[index] = workouts[index].copyWith(
+        // duration: workoutTime,
+        // calories: calories,
+        isCompleted: true,
+      );
       print('Workout ${workout.title} marked as COMPLETED for today.');
 
-      emit(WorkoutsLoaded(workouts: List.from(workouts)));
+      emit(
+        WorkoutsLoaded(
+          workouts: List.from(workouts),
+          totalTime: totalWorkoutTime,
+          totalCal: totalWorkoutCal,
+        ),
+      );
     } catch (e) {
       print('Error toggling workout completion in Firebase: $e');
       emit(WorkoutsError(message: 'Failed to update workout status: $e'));

@@ -16,10 +16,11 @@ class WorkoutHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final stepsToday = 7450;
+    // final stepsToday = 7450;
 
     // Get the current user
     final User? currentUser = FirebaseAuth.instance.currentUser;
+    print('currentUser: ${currentUser?.email}');
 
     return Scaffold(
       appBar: AppBar(title: Text('🏋️ Keep it up!'), centerTitle: true),
@@ -28,9 +29,7 @@ class WorkoutHomePage extends StatelessWidget {
           if (state is WorkoutsLoaded) {
             int workoutMinutes = 0;
             for (var workout in state.workouts) {
-              if (workout.isCompleted) {
-                workoutMinutes += workout.duration;
-              }
+              workoutMinutes += workout.duration;
             }
             return Padding(
               padding: const EdgeInsets.all(20),
@@ -45,14 +44,16 @@ class WorkoutHomePage extends StatelessWidget {
                         children: [
                           const Icon(Icons.directions_walk),
                           const SizedBox(height: 8),
-                          Text('$stepsToday Steps'),
+                          Text("${state.totalCal.toStringAsFixed(0)} Cal"),
                         ],
                       ),
                       Column(
                         children: [
                           const Icon(Icons.timer),
                           const SizedBox(height: 8),
-                          Text('$workoutMinutes min'),
+                          Text(
+                            '${(state.totalTime ~/ 60).toString().padLeft(1, '0')} / $workoutMinutes min',
+                          ),
                         ],
                       ),
                     ],

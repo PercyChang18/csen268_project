@@ -32,7 +32,7 @@ class WorkoutCard extends StatelessWidget {
             ),
             SizedBox(height: 15.0),
             if (workout.isCompleted)
-              Icon(Icons.check, color: Colors.black, size: 40),
+              Icon(Icons.check, color: Color(0xFF3B3B3B), size: 40),
           ],
         ),
       ),

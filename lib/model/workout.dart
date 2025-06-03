@@ -11,7 +11,7 @@ class Workout {
   final String endImage;
   final String description;
   final int duration;
-  final int calories;
+  final double calories;
   final List<String>? equipments;
   bool isCompleted;
 
@@ -38,7 +38,7 @@ class Workout {
       description:
           data['description'] as String? ?? 'No description available.',
       duration: data['duration'] as int? ?? 0,
-      calories: data['calories'] as int? ?? 0,
+      calories: (data['calories'] as num?)?.toDouble() ?? 0,
       equipments: List<String>.from(data['equipments'] ?? []),
     );
   }
@@ -51,7 +51,7 @@ class Workout {
     String? endImage,
     String? description,
     int? duration,
-    int? calories,
+    double? calories,
     List<String>? equipments,
     bool? isCompleted,
   }) {
