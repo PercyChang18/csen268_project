@@ -124,7 +124,7 @@ class _LogPageState extends State<LogPage> {
                                       ),
                                       child: ListTile(
                                         title: Text(
-                                          workout.title,
+                                          '(${workout.category}) ${workout.title}',
                                           style: const TextStyle(
                                             fontSize: 16.0,
                                             color: Colors.white,
