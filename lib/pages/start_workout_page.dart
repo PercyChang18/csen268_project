@@ -100,7 +100,9 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
         title: Text(widget.workout.title),
         centerTitle: true,
         automaticallyImplyLeading:
-            isGpsOn ? !isTracking : isPaused && currentSeconds > 0,
+            widget.workout.title == "Outdoor Run"
+                ? !isTracking && currentSeconds > 0
+                : isPaused && currentSeconds > 0,
       ),
       body:
           widget.workout.title == "Outdoor Run"
@@ -520,7 +522,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
     positionStreamSubscription = Geolocator.getPositionStream(
       locationSettings: LocationSettings(
         accuracy: LocationAccuracy.best,
-        distanceFilter: 10,
+        distanceFilter: 1,
       ),
     ).listen((Position position) {
       setState(() {
