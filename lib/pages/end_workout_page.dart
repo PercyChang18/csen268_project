@@ -14,6 +14,8 @@ class EndWorkoutPage extends StatefulWidget {
 }
 
 class _EndWorkoutPageState extends State<EndWorkoutPage> {
+  String minutes = "";
+  String seconds = "";
   @override
   void initState() {
     super.initState();
@@ -29,6 +31,8 @@ class _EndWorkoutPageState extends State<EndWorkoutPage> {
       // 3. Emit a new WorkoutsLoaded state.
       BlocProvider.of<WorkoutCubit>(context).completeWorkout(widget.workout);
     });
+    minutes = (widget.workout.duration ~/ 60).toString().padLeft(2, '0');
+    seconds = (widget.workout.duration % 60).toString().padLeft(2, '0');
   }
 
   @override
@@ -54,13 +58,10 @@ class _EndWorkoutPageState extends State<EndWorkoutPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  '${widget.workout.duration}',
-                  style: const TextStyle(fontSize: 28),
-                ),
+                Text('$minutes:$seconds', style: const TextStyle(fontSize: 28)),
                 SizedBox(width: 12),
                 Text(
-                  'Minutes',
+                  'Time',
                   style: const TextStyle(
                     fontSize: 28,
                     color: Color(0xFFFF9100),

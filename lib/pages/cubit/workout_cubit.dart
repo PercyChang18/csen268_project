@@ -7,6 +7,7 @@ import 'package:csen268_project/model/workout.dart';
 import 'package:csen268_project/pages/test_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
+import 'package:geolocator/geolocator.dart';
 
 part 'workout_state.dart';
 
@@ -34,7 +35,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     DateTime.wednesday: ["Abs", "Leg"],
   };
   final Map<int, List<String>> _highWorkoutPlan = {
-    DateTime.monday: ["Chest", "Back", "Abs"],
+    DateTime.monday: ["Chest", "Back", "Abs", "Cardio"],
   };
 
   WorkoutCubit() : super(WorkoutInitial()) {

@@ -19,11 +19,15 @@ class WorkoutCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(
-              workout.title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF3B3B3B),
+            Expanded(
+              child: Text(
+                workout.title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF3B3B3B),
+                ),
+                maxLines: 2, // Limit to 2 lines
+                overflow: TextOverflow.visible,
               ),
             ),
             SizedBox(height: 15.0),

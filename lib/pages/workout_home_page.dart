@@ -61,7 +61,7 @@ class WorkoutHomePage extends StatelessWidget {
                   Text("Workout Today", style: textTheme.titleLarge),
                   SizedBox(height: 29.0),
                   state.workouts.isEmpty
-                      ? Text("No workout for today!")
+                      ? Center(child: Text("No workout for today!"))
                       : Wrap(
                         spacing: 31,
                         runSpacing: 31,
