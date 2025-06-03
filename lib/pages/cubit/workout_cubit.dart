@@ -20,7 +20,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   double totalWorkoutCal = 0;
 
   final Set<int> _lowWorkoutDays = {
-    DateTime.tuesday,
+    DateTime.monday,
     DateTime.wednesday,
     DateTime.friday,
   };
@@ -33,11 +33,15 @@ class WorkoutCubit extends Cubit<WorkoutState> {
 
   // TODO: Complete the plans.
   final Map<int, List<String>> _lowWorkoutPlan = {
-    DateTime.tuesday: ["Chest", "Back"],
+    DateTime.monday: ["Chest", "Back"],
     DateTime.wednesday: ["Abs", "Leg"],
+    DateTime.thursday: ["Cardio", "Shoulder"],
   };
   final Map<int, List<String>> _highWorkoutPlan = {
     DateTime.tuesday: ["Chest", "Back", "Abs", "Cardio"],
+    DateTime.wednesday: ["Abs", "Shoulder", "Leg"],
+    DateTime.thursday: ["Chest", "Back", "Cardio"],
+    DateTime.saturday: ["Shoulder", "Leg", "Cardio"],
   };
 
   WorkoutCubit() : super(WorkoutInitial()) {
@@ -114,8 +118,6 @@ class WorkoutCubit extends Cubit<WorkoutState> {
           return;
         }
       }
-
-      // TODO: assign based on category
 
       final DocumentReference<Map<String, dynamic>> dailyWorkoutsDocRef =
           _firestore

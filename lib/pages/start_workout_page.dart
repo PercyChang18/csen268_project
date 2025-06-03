@@ -182,6 +182,8 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                       ],
                     ),
                     SizedBox(height: 60.0),
+                    // if (currentSeconds == 0)
+                    //   Center(child: Text("Exercise goal is reached!")),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -236,14 +238,14 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                             style: IconButton.styleFrom(
                               shape: CircleBorder(),
                               backgroundColor:
-                                  isPaused
+                                  isPaused && currentSeconds < 0
                                       ? Color(0xFFD5DBDC)
                                       : Color(0x33D5DBDC),
                               foregroundColor: Color(0xCC4B4B4B),
                             ),
                             onPressed:
                                 () =>
-                                    isPaused && currentSeconds == 0
+                                    isPaused && currentSeconds < 0
                                         ? endTimer()
                                         : null,
                             icon: Icon(Icons.stop),
@@ -251,6 +253,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                         ),
                       ],
                     ),
+                    SizedBox(height: 30.0),
                   ],
                 ),
               )
@@ -363,6 +366,8 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                         ],
                       ),
                       SizedBox(height: 60.0),
+                      // if (currentSeconds == 0)
+                      //   Center(child: Text("Exercise goal is reached!")),
                       // Timer
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -416,14 +421,14 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                               style: IconButton.styleFrom(
                                 shape: CircleBorder(),
                                 backgroundColor:
-                                    isPaused && currentSeconds == 0
+                                    isPaused && currentSeconds < 0
                                         ? Color(0xFFD5DBDC)
                                         : Color(0x33D5DBDC),
                                 foregroundColor: Color(0xCC4B4B4B),
                               ),
                               onPressed:
                                   () =>
-                                      isPaused && currentSeconds == 0
+                                      isPaused && currentSeconds < 0
                                           ? endTimer()
                                           : null,
                               icon: Icon(Icons.stop),
@@ -431,6 +436,7 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
                           ),
                         ],
                       ),
+                      SizedBox(height: 30.0),
                     ],
                   ),
                 ),
@@ -447,6 +453,10 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (currentSeconds > 0) {
         currentSeconds--;
+      }
+      if (currentSeconds == 0) {
+        _showSnackBar("Exercise goal is reached!");
+        currentSeconds = -1;
       }
       workoutSeconds++;
       minutes = (workoutSeconds ~/ 60).toString().padLeft(2, '0');
@@ -513,7 +523,6 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
       return;
     }
     setState(() {
-      isPaused = !isPaused;
       isTracking = true;
       locationStatus = "Tracking...";
       lastPosition = null;
@@ -546,7 +555,6 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
   void _stopTracking() {
     positionStreamSubscription?.cancel(); // Cancel the stream subscription
     setState(() {
-      isPaused = true;
       isTracking = false;
       locationStatus = "Tracking stopped.";
     });
