@@ -6,10 +6,12 @@ class UserProfile {
   double? weight;
   double? height;
   int? age;
+  String? name;
   List<String> purposes;
   List<String> availableEquipments;
 
   UserProfile({
+    this.name,
     this.gender,
     this.weight,
     this.height,
@@ -26,6 +28,7 @@ class UserProfile {
       if (weight != null) "weight": weight,
       if (height != null) "height": height,
       if (age != null) "age": age,
+      if (name != null) "name": name,
       "purpose": purposes,
       "availableEquipment": availableEquipments,
     };

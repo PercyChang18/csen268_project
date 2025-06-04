@@ -72,13 +72,13 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text('Welcome!'), centerTitle: true),
       body: Padding(
         padding: EdgeInsets.fromLTRB(22, 50, 22, 18),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Welcome', style: TextStyle(fontSize: 64)),
               SizedBox(height: 15),
               Form(
                 key: _formKey,
@@ -90,6 +90,30 @@ class _WelcomePageState extends State<WelcomePage> {
                       style: TextStyle(fontSize: 32),
                     ),
                     SizedBox(height: 12),
+                    // Ask for name
+                    SizedBox(
+                      width: 280,
+                      height: 60,
+                      child: TextFormField(
+                        keyboardType: TextInputType.name,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'[a-zA-Z\s]'),
+                          ),
+                        ],
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(labelText: "Name"),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your name';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _userProfile.name = value;
+                        },
+                      ),
+                    ),
                     SizedBox(
                       width: 280,
                       height: 60,
@@ -131,7 +155,9 @@ class _WelcomePageState extends State<WelcomePage> {
                           ),
                         ],
                         style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(labelText: "Weight:"),
+                        decoration: InputDecoration(
+                          labelText: "Weight (in kg):",
+                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your weight';
@@ -159,7 +185,9 @@ class _WelcomePageState extends State<WelcomePage> {
                           ),
                         ],
                         style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(labelText: 'Height:'),
+                        decoration: InputDecoration(
+                          labelText: 'Height (in cm):',
+                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your height';
