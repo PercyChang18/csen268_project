@@ -38,7 +38,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     DateTime.thursday: ["Cardio", "Shoulder"],
   };
   final Map<int, List<String>> _highWorkoutPlan = {
-    DateTime.tuesday: ["Chest", "Back", "Abs", "Cardio"],
+    DateTime.tuesday: ["Chest", "Leg", "Abs", "Cardio"],
     DateTime.wednesday: ["Abs", "Shoulder", "Leg"],
     DateTime.thursday: ["Chest", "Back", "Cardio"],
     DateTime.saturday: ["Shoulder", "Leg", "Cardio"],
