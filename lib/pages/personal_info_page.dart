@@ -365,7 +365,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               _formKey.currentState!.save();
                               // Update user profile with current controller values
@@ -380,38 +380,36 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                               );
                               if (_currentUser != null) {
                                 // SAVE to 'users'!
-                                FirebaseFirestore.instance
-                                    .collection('users')
-                                    .doc(_currentUser!.uid)
-                                    .set(
-                                      _userProfile.toFireStore(),
-                                      SetOptions(merge: true),
-                                    ) // Use merge option
-                                    .then((_) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Profile updated successfully!',
-                                          ),
-                                        ),
-                                      );
-                                    })
-                                    .catchError((error) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Failed to update profile: $error',
-                                          ),
-                                        ),
-                                      );
-                                    });
+                                try {
+                                  await FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(_currentUser!.uid)
+                                      .set(
+                                        _userProfile.toFireStore(),
+                                        SetOptions(merge: true),
+                                      ); // Use merge option
+                                  if (!mounted) return;
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Profile updated successfully!',
+                                      ),
+                                    ),
+                                  );
+                                  context.read<WorkoutCubit>().reassign();
+                                  context.goNamed(RouteName.home);
+                                } catch (error) {
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Failed to update profile: $error',
+                                      ),
+                                    ),
+                                  );
+                                }
                               }
-                              context.read<WorkoutCubit>().reassign();
-                              context.goNamed(RouteName.home);
                             }
                           },
                           child: const Text('Update'),
