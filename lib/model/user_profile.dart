@@ -7,6 +7,7 @@ class UserProfile {
   double? height;
   int? age;
   String? name;
+  String? reminderTime;
   List<String> purposes;
   List<String> availableEquipments;
 
@@ -16,6 +17,7 @@ class UserProfile {
     this.weight,
     this.height,
     this.age,
+    this.reminderTime,
     List<String>? purposes,
     List<String>? availableEquipments,
   }) : purposes = purposes ?? [],
@@ -29,6 +31,7 @@ class UserProfile {
       if (height != null) "height": height,
       if (age != null) "age": age,
       if (name != null) "name": name,
+      if (reminderTime != null) "reminderTime": reminderTime,
       "purpose": purposes,
       "availableEquipment": availableEquipments,
     };
@@ -46,6 +49,7 @@ class UserProfile {
       height: data?["height"],
       age: data?["age"],
       name: data?["name"],
+      reminderTime: data?["reminderTime"],
       purposes: List<String>.from(data?["purpose"] ?? []),
       availableEquipments: List<String>.from(data?["availableEquipment"] ?? []),
     );

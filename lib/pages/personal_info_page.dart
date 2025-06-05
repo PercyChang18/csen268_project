@@ -2,6 +2,7 @@ import 'package:csen268_project/bloc/authentication_bloc.dart';
 import 'package:csen268_project/model/user_profile.dart';
 import 'package:csen268_project/navigation/router.dart';
 import 'package:csen268_project/pages/cubit/workout_cubit.dart';
+import 'package:csen268_project/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +21,8 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
   final _formKey = GlobalKey<FormState>();
   UserProfile _userProfile = UserProfile();
   User? _currentUser;
+  final NotificationService _notificationService = NotificationService();
+  TimeOfDay? _selectedTime;
 
   final List<String> genders = ['Male', 'Female', 'Non-Binary'];
   final List<String> allPurposes = [
@@ -42,8 +45,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
   late final TextEditingController _heightController;
   late final TextEditingController _ageController;
 
-  String?
-  _userEmail; // We will remove _userName since the controller will handle the name
+  String? _userEmail;
 
   @override
   void initState() {
@@ -77,6 +79,14 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
           _weightController.text = _userProfile.weight?.toString() ?? '';
           _heightController.text = _userProfile.height?.toString() ?? '';
           _ageController.text = _userProfile.age?.toString() ?? '';
+          // notification settings
+          if (_userProfile.reminderTime != null) {
+            final parts = _userProfile.reminderTime!.split(':');
+            _selectedTime = TimeOfDay(
+              hour: int.parse(parts[0]),
+              minute: int.parse(parts[1]),
+            );
+          }
         });
       }
     } on FirebaseException catch (e) {
@@ -88,9 +98,22 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     }
   }
 
+  // pick notification time
+  Future<void> _pickTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? const TimeOfDay(hour: 8, minute: 0),
+    );
+    if (picked != null && picked != _selectedTime) {
+      setState(() {
+        _selectedTime = picked;
+      });
+    }
+  }
+
   @override
   void dispose() {
-    _nameController.dispose(); // ADD THIS
+    _nameController.dispose();
     _weightController.dispose();
     _heightController.dispose();
     _ageController.dispose();
@@ -145,9 +168,9 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Personal Information',
-                      style: TextStyle(fontSize: 32),
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 12),
                     // Name
@@ -296,7 +319,43 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text('Purpose', style: TextStyle(fontSize: 32)),
+                    Text(
+                      'Notification Setting',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _selectedTime != null
+                                ? 'Remind me at: ${_selectedTime!.format(context)}'
+                                : 'No reminder set',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          ElevatedButton(
+                            onPressed: _pickTime,
+                            child: Text(
+                              _selectedTime != null ? 'Change' : 'Set Time',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Purpose',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
@@ -344,9 +403,9 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                           }).toList(),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
+                    Text(
                       'Available Equipments',
-                      style: TextStyle(fontSize: 32),
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 12),
                     Wrap(
@@ -404,9 +463,6 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               _formKey.currentState!.save();
-                              // Update user profile with current controller values
-                              // The onSaved callbacks already handle this, but we can also be explicit
-                              // _userProfile.name is already set by onSaved
                               _userProfile.weight = double.tryParse(
                                 _weightController.text,
                               );
@@ -416,6 +472,19 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                               _userProfile.age = int.tryParse(
                                 _ageController.text,
                               );
+                              // if selected notification time is not null
+                              if (_selectedTime != null) {
+                                _userProfile.reminderTime =
+                                    '${_selectedTime!.hour}:${_selectedTime!.minute}';
+                                await _notificationService
+                                    .scheduleDailyWorkoutReminder(
+                                      _selectedTime!,
+                                    );
+                              } else {
+                                _userProfile.reminderTime = null;
+                                await _notificationService
+                                    .cancelAllNotifications();
+                              }
                               if (_currentUser != null) {
                                 // SAVE to 'users'!
                                 try {
