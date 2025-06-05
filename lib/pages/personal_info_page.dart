@@ -37,7 +37,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
   ];
 
   // Text editing controllers for the form fields
-  late final TextEditingController _nameController; // ADD THIS
+  late final TextEditingController _nameController;
   late final TextEditingController _weightController;
   late final TextEditingController _heightController;
   late final TextEditingController _ageController;
@@ -73,7 +73,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
       if (userDoc.exists && userDoc.data() != null) {
         setState(() {
           _userProfile = UserProfile.fromFireStore(userDoc, null);
-          _nameController.text = _userProfile.name ?? ''; // ADD THIS
+          _nameController.text = _userProfile.name ?? '';
           _weightController.text = _userProfile.weight?.toString() ?? '';
           _heightController.text = _userProfile.height?.toString() ?? '';
           _ageController.text = _userProfile.age?.toString() ?? '';
@@ -119,12 +119,11 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // This Text widget can now listen to the controller for real-time updates if you want
-                      // For simplicity, we'll leave it, but the editable field below is the main focus.
                       ValueListenableBuilder<TextEditingValue>(
                         valueListenable: _nameController,
                         builder: (context, value, child) {
                           return Text(
-                            value.text.isNotEmpty ? value.text : 'User Card',
+                            value.text.isNotEmpty ? value.text : 'User Name',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -151,7 +150,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       style: TextStyle(fontSize: 32),
                     ),
                     const SizedBox(height: 12),
-                    // START: ADD NAME TEXTFORMFIELD
+                    // Name
                     SizedBox(
                       width: 280,
                       height: 60,
@@ -160,11 +159,13 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                         keyboardType: TextInputType.name,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
-                            RegExp(r'[a-zA-Z\s]'),
+                            RegExp(r'[0-9a-zA-Z\s]'),
                           ),
                         ],
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(labelText: 'Name'),
+                        decoration: const InputDecoration(
+                          labelText: 'Display name',
+                        ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your name';
@@ -176,7 +177,6 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                         },
                       ),
                     ),
-                    // END: ADD NAME TEXTFORMFIELD
                     const SizedBox(height: 12),
                     // Gender
                     SizedBox(

@@ -98,7 +98,7 @@ class _WelcomePageState extends State<WelcomePage> {
                         keyboardType: TextInputType.name,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
-                            RegExp(r'[a-zA-Z\s]'),
+                            RegExp(r'[0-9a-zA-Z\s]'),
                           ),
                         ],
                         style: const TextStyle(color: Colors.white),
