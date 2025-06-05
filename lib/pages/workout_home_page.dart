@@ -63,24 +63,25 @@ class WorkoutHomePage extends StatelessWidget {
                   SizedBox(height: 29.0),
                   state.workouts.isEmpty
                       ? Center(child: Text("No workout for today!"))
-                      : Wrap(
-                        spacing: 31,
-                        runSpacing: 31,
-                        alignment: WrapAlignment.start,
-                        children:
-                            state.workouts
-                                .map(
-                                  (workout) => InkWell(
-                                    onTap: () {
-                                      context.goNamed(
-                                        RouteName.startWorkout,
-                                        extra: workout,
-                                      );
-                                    },
-                                    child: WorkoutCard(workout: workout),
-                                  ),
-                                )
-                                .toList(),
+                      : SizedBox(
+                        child: Wrap(
+                          spacing: 25,
+                          runSpacing: 25,
+                          children:
+                              state.workouts
+                                  .map(
+                                    (workout) => InkWell(
+                                      onTap: () {
+                                        context.goNamed(
+                                          RouteName.startWorkout,
+                                          extra: workout,
+                                        );
+                                      },
+                                      child: WorkoutCard(workout: workout),
+                                    ),
+                                  )
+                                  .toList(),
+                        ),
                       ),
                   // TODO: This is just a stream builder example. Delete if not needed.
                   // StreamBuilder<DocumentSnapshot>(
@@ -100,7 +101,9 @@ class WorkoutHomePage extends StatelessWidget {
               ),
             );
           } else {
-            return Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(color: Color(0xFFFF9100)),
+            );
           }
         },
       ),

@@ -194,8 +194,8 @@ class _LogPageState extends State<LogPage> {
         );
       }
 
-      if (assignedWorkoutIds.isEmpty) {
-        // No workouts assigned for this day
+      if (assignedWorkoutIds.isEmpty || completedWorkoutIds.isEmpty) {
+        // No workouts assigned or completed for this day
         setState(() {
           _dailyWorkouts = [];
           _isLoadingWorkouts = false;
@@ -203,24 +203,18 @@ class _LogPageState extends State<LogPage> {
         return;
       }
 
-      final QuerySnapshot<Map<String, dynamic>> assignedWorkoutsSnapshot =
+      final QuerySnapshot<Map<String, dynamic>> completedWorkoutsSnapshot =
           await _firestore
               .collection('workouts')
-              .where(FieldPath.documentId, whereIn: assignedWorkoutIds)
+              .where(FieldPath.documentId, whereIn: completedWorkoutIds)
               .get();
 
       List<Workout> fetchedWorkouts =
-          assignedWorkoutsSnapshot.docs
-              .map((doc) {
-                final workout = Workout.fromFirestore(doc.id, doc.data());
-
-                final bool isCompleted = completedWorkoutIds.contains(
-                  workout.id,
-                );
-                return workout.copyWith(isCompleted: isCompleted);
-              })
-              .where((workout) => workout.isCompleted)
-              .toList();
+          completedWorkoutsSnapshot.docs.map((doc) {
+            final workout = Workout.fromFirestore(doc.id, doc.data());
+            print('Workout: ${workout.title}');
+            return workout;
+          }).toList();
 
       setState(() {
         _dailyWorkouts = fetchedWorkouts;

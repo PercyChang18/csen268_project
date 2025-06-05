@@ -11,6 +11,8 @@ import 'package:geolocator/geolocator.dart';
 
 part 'workout_state.dart';
 
+enum WorkoutPlan { high, medium, low }
+
 class WorkoutCubit extends Cubit<WorkoutState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -22,12 +24,18 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   final Set<int> _lowWorkoutDays = {
     DateTime.monday,
     DateTime.wednesday,
+    DateTime.thursday,
+  };
+  final Set<int> _mediumWorkoutDays = {
+    DateTime.monday,
+    DateTime.wednesday,
     DateTime.friday,
+    DateTime.saturday,
   };
   final Set<int> _highWorkoutDays = {
     DateTime.tuesday,
     DateTime.wednesday,
-    DateTime.friday,
+    DateTime.thursday,
     DateTime.saturday,
   };
 
@@ -35,12 +43,20 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   final Map<int, List<String>> _lowWorkoutPlan = {
     DateTime.monday: ["Chest", "Back"],
     DateTime.wednesday: ["Abs", "Leg"],
-    DateTime.thursday: ["Cardio", "Shoulder"],
+    DateTime.thursday: ["Cardio", "Abs"],
   };
+
+  final Map<int, List<String>> _mediumWorkoutPlan = {
+    DateTime.monday: ["Chest", "Back"],
+    DateTime.wednesday: ["Abs", "Leg"],
+    DateTime.friday: ["Cardio", "Back"],
+    DateTime.saturday: ["Abs", "Shoulder", "Leg"],
+  };
+
   final Map<int, List<String>> _highWorkoutPlan = {
     DateTime.tuesday: ["Chest", "Leg", "Abs", "Cardio"],
     DateTime.wednesday: ["Abs", "Shoulder", "Leg"],
-    DateTime.thursday: ["Chest", "Back", "Cardio"],
+    DateTime.thursday: ["Chest", "Back", "Cardio", "Leg"],
     DateTime.saturday: ["Shoulder", "Leg", "Cardio"],
   };
 
@@ -69,7 +85,6 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       print("Reassign in init!");
     }
     final currentUser = FirebaseAuth.instance.currentUser;
-    print('Use: $currentUser');
     // should not happen, but if the user is not logged in
     if (currentUser == null) {
       print("User is not logged in!");
@@ -96,21 +111,29 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       final String todayDocId = today.toIso8601String().substring(0, 10);
 
       bool needsAssignment = true;
-      bool highWorkout = true;
+      WorkoutPlan plan = WorkoutPlan.high;
 
-      // Workout assignment:
-      // If contain Improve Physique or Build Strength: assign 4 days a week.
-      // Else: 3 days a week.
-      if (userPurposes.contains('Improve Physique') ||
+      // Workout assignments
+      if (userPurposes.contains('Improve Physique') &&
           userPurposes.contains('Build Strength')) {
+        plan = WorkoutPlan.high;
         if (!_highWorkoutDays.contains(today.weekday)) {
           needsAssignment = false;
           print("No workout for today!");
           emit(WorkoutsLoaded(workouts: [], totalTime: 0, totalCal: 0));
           return;
         }
+      } else if (userPurposes.contains('Improve Physique') ||
+          userPurposes.contains('Build Strength')) {
+        plan = WorkoutPlan.medium;
+        if (!_mediumWorkoutDays.contains(today.weekday)) {
+          needsAssignment = false;
+          print("No workout for today!");
+          emit(WorkoutsLoaded(workouts: [], totalTime: 0, totalCal: 0));
+          return;
+        }
       } else {
-        highWorkout = false;
+        plan = WorkoutPlan.low;
         if (!_lowWorkoutDays.contains(today.weekday)) {
           needsAssignment = false;
           print("No workout for today!");
@@ -133,6 +156,8 @@ class WorkoutCubit extends Cubit<WorkoutState> {
       List<String> completedWorkoutIdsForToday =
           []; // To store completed IDs from Firestore
 
+      totalWorkoutTime = 0;
+      totalWorkoutCal = 0;
       if (dailyWorkoutsDoc.exists && dailyWorkoutsDoc.data() != null) {
         final data = dailyWorkoutsDoc.data()!;
         assignedWorkoutIds = List<String>.from(
@@ -147,6 +172,15 @@ class WorkoutCubit extends Cubit<WorkoutState> {
         totalWorkoutTime = data['totalTime'] ?? 0;
         totalWorkoutCal = (data['totalCal'] as num?)?.toDouble() ?? 0;
       }
+      List<Workout> selectedWorkouts = [];
+      // Get the categories of completed workouts. Don't reassign these category.
+      List<Future<String>> completedWorkoutRef =
+          completedWorkoutIdsForToday
+              .map((id) => _getCompletedWorkoutCategory(id))
+              .toList();
+      List<String> completedCategories = await Future.wait(completedWorkoutRef);
+      print(completedCategories);
+
       if (needsAssignment) {
         print('Assigning new workouts for today...');
         final List<Workout> allWorkouts = await _getAllWorkouts();
@@ -163,39 +197,67 @@ class WorkoutCubit extends Cubit<WorkoutState> {
               );
             }).toList();
 
-        List<Workout> selectedWorkouts = [];
+        switch (plan) {
+          case WorkoutPlan.high:
+            for (String category in _highWorkoutPlan[today.weekday]!) {
+              if (!completedCategories.contains(category)) {
+                List<Workout> workoutsInCategory =
+                    availableWorkouts
+                        .where((workout) => workout.category == category)
+                        .toList();
+                if (workoutsInCategory.isNotEmpty) {
+                  selectedWorkouts.add(
+                    workoutsInCategory[Random().nextInt(
+                      workoutsInCategory.length,
+                    )],
+                  );
+                }
+              }
+            }
+            assignedWorkoutIds = selectedWorkouts.map((w) => w.id).toList();
 
-        if (highWorkout) {
-          for (String category in _highWorkoutPlan[today.weekday]!) {
-            List<Workout> workoutsInCategory =
-                availableWorkouts
-                    .where((workout) => workout.category == category)
-                    .toList();
-            print("cate workout: $workoutsInCategory");
-            if (workoutsInCategory.isNotEmpty) {
-              selectedWorkouts.add(
-                workoutsInCategory[Random().nextInt(workoutsInCategory.length)],
-              );
+            print("Assign workouts: $assignedWorkoutIds");
+
+          case WorkoutPlan.medium:
+            for (String category in _mediumWorkoutPlan[today.weekday]!) {
+              if (!completedCategories.contains(category)) {
+                List<Workout> workoutsInCategory =
+                    availableWorkouts
+                        .where((workout) => workout.category == category)
+                        .toList();
+                if (workoutsInCategory.isNotEmpty) {
+                  selectedWorkouts.add(
+                    workoutsInCategory[Random().nextInt(
+                      workoutsInCategory.length,
+                    )],
+                  );
+                }
+              }
             }
-          }
-          assignedWorkoutIds = selectedWorkouts.map((w) => w.id).toList();
-          print(assignedWorkoutIds);
-        } else {
-          for (String category in _lowWorkoutPlan[today.weekday]!) {
-            List<Workout> workoutsInCategory =
-                availableWorkouts
-                    .where((workout) => workout.category == category)
-                    .toList();
-            print("cate workout: $workoutsInCategory");
-            if (workoutsInCategory.isNotEmpty) {
-              selectedWorkouts.add(
-                workoutsInCategory[Random().nextInt(workoutsInCategory.length)],
-              );
+            assignedWorkoutIds = selectedWorkouts.map((w) => w.id).toList();
+            print(assignedWorkoutIds);
+
+          case WorkoutPlan.low:
+            for (String category in _lowWorkoutPlan[today.weekday]!) {
+              if (!completedCategories.contains(category)) {
+                List<Workout> workoutsInCategory =
+                    availableWorkouts
+                        .where((workout) => workout.category == category)
+                        .toList();
+                if (workoutsInCategory.isNotEmpty) {
+                  selectedWorkouts.add(
+                    workoutsInCategory[Random().nextInt(
+                      workoutsInCategory.length,
+                    )],
+                  );
+                }
+              }
             }
-          }
-          assignedWorkoutIds = selectedWorkouts.map((w) => w.id).toList();
-          print(assignedWorkoutIds);
+            assignedWorkoutIds = selectedWorkouts.map((w) => w.id).toList();
+            print(assignedWorkoutIds);
         }
+
+        assignedWorkoutIds.addAll(completedWorkoutIdsForToday);
 
         await dailyWorkoutsDocRef.set({
           'date': Timestamp.fromDate(today),
@@ -207,8 +269,6 @@ class WorkoutCubit extends Cubit<WorkoutState> {
         print(
           'Workouts assigned and updated in user dailyWorkouts subcollection.',
         );
-        // No workouts are completed yet on a new assignment
-        // completedWorkoutIdsForToday = [];
       } else {
         print('Workouts already assigned for today. Fetching existing ones.');
       }
@@ -242,8 +302,6 @@ class WorkoutCubit extends Cubit<WorkoutState> {
             );
             return workout.copyWith(isCompleted: isCompleted);
           }).toList();
-
-      print('workouts: $workouts');
       emit(
         WorkoutsLoaded(
           workouts: List.from(workouts),
@@ -265,13 +323,26 @@ class WorkoutCubit extends Cubit<WorkoutState> {
     try {
       final QuerySnapshot<Map<String, dynamic>> snapshot =
           await _firestore.collection('workouts').get();
-      print("here");
       return snapshot.docs
           .map((doc) => Workout.fromFirestore(doc.id, doc.data()))
           .toList();
     } catch (e) {
       print('Error getting all workouts: $e');
       return [];
+    }
+  }
+
+  Future<String> _getCompletedWorkoutCategory(String id) async {
+    try {
+      final DocumentReference<Map<String, dynamic>> workoutsDocRef = _firestore
+          .collection('workouts')
+          .doc(id);
+      DocumentSnapshot<Map<String, dynamic>> workoutsDoc =
+          await workoutsDocRef.get();
+      return workoutsDoc.data()?['category'];
+    } catch (e) {
+      print('Error getting all workouts: $e');
+      return "";
     }
   }
 

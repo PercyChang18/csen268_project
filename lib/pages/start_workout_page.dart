@@ -498,8 +498,6 @@ class _StartWorkoutPageState extends State<StartWorkoutPage> {
       seconds = (workoutSeconds % 60).toString().padLeft(2, '0');
 
       workoutCal += calPerSecond;
-
-      print("workout cal: $workoutCal");
       setState(() {});
     });
   }
