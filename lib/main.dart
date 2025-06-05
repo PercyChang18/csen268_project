@@ -5,6 +5,7 @@ import 'package:csen268_project/pages/cubit/workout_cubit.dart';
 import 'package:csen268_project/repositories/authentication/authentication.dart';
 import 'package:csen268_project/theme/theme.dart';
 import 'package:csen268_project/theme/theme_cubit.dart';
+import 'package:csen268_project/services/notification_service.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
@@ -22,10 +23,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Message notification: ${message.notification?.body}');
 }
 
+final NotificationService notificationService = NotificationService();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  print(await FirebaseInstallations.instance.getId());
+  await notificationService.init();
 
   final messaging = FirebaseMessaging.instance;
   final settings = await messaging.requestPermission(
