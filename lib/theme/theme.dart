@@ -2,9 +2,26 @@ import 'package:csen268_project/services/mock.dart';
 import 'package:flutter/material.dart';
 
 final ThemeData myTheme = ThemeData(
+  colorScheme: const ColorScheme(
+    brightness: Brightness.light,
+
+    primary: Color(0xFFFF9100),
+    onPrimary: Color(4294967295),
+    primaryContainer: Color(4291487487),
+    onPrimaryContainer: Color(4278197808),
+    surfaceTint: Color(4280837002),
+
+    secondary: Colors.brown,
+    onSecondary: Color(4294967295),
+    surface: Color(0xFF3B3B3B),
+    onSurface: Color(0xFFD5DBDC),
+    error: Colors.deepOrange,
+    onError: Color(4294967295),
+    errorContainer: Color(4294957782),
+    onErrorContainer: Color(4282449922),
+  ),
   textSelectionTheme: TextSelectionThemeData(cursorColor: Color(0xFFFF9100)),
   scaffoldBackgroundColor: const Color(0xFF3B3B3B),
-  primaryColor: const Color(0xFFFF9100),
   dropdownMenuTheme: DropdownMenuThemeData(),
   textTheme: const TextTheme(
     titleLarge: TextStyle(
@@ -77,13 +94,7 @@ final ThemeData myTheme = ThemeData(
       textStyle: TextStyle(color: Color(0xFFD5DBDC)),
     ),
   ),
-  // experimenting colors of the buttons
-  // iconButtonTheme: IconButtonThemeData(
-  //   style: IconButton.styleFrom(foregroundColor: Color(0xFFFF9100)),
-  // ),
-  // filledButtonTheme: FilledButtonThemeData(
-  //   style: FilledButton.styleFrom(foregroundColor: const Color(0xFFFF9100)),
-  // ),
+
   // this is the sign in button
   outlinedButtonTheme: OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(foregroundColor: Color(0xFFD5DBDC)),

@@ -24,7 +24,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
   final NotificationService _notificationService = NotificationService();
   TimeOfDay? _selectedTime;
 
-  final List<String> genders = ['Male', 'Female', 'Non-Binary'];
+  final List<String> genders = ['Male', 'Female', 'Non-binary'];
   final List<String> allPurposes = [
     'Improve Physique',
     'Boost Energy',
@@ -124,6 +124,8 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Settings'),
+        // centerTitle: true,
         leading: IconButton(
           onPressed: context.pop,
           icon: const Icon(Icons.arrow_back),
@@ -135,8 +137,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
           child: Column(
             children: [
               Container(
-                width: 200,
-                height: 80, // Adjusted height to accommodate name and email
+                height: 80,
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -146,9 +147,11 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                         valueListenable: _nameController,
                         builder: (context, value, child) {
                           return Text(
-                            value.text.isNotEmpty ? value.text : 'User Name',
+                            value.text.isNotEmpty
+                                ? "Welcome! " + value.text
+                                : 'User Name',
                             style: const TextStyle(
-                              fontSize: 18,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           );
@@ -156,7 +159,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       ),
                       Text(
                         _userEmail ?? 'No Email',
-                        style: const TextStyle(fontSize: 14),
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ],
                   ),
@@ -169,7 +172,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Personal Information',
+                      'Profile',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 12),
@@ -320,7 +323,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Notification Setting',
+                      'Notification',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 12),

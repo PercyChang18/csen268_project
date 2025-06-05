@@ -87,7 +87,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   children: [
                     Text(
                       'Personal Information',
-                      style: TextStyle(fontSize: 32),
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     SizedBox(height: 12),
                     // Ask for name
@@ -228,7 +228,10 @@ class _WelcomePageState extends State<WelcomePage> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    Text('Purpose', style: TextStyle(fontSize: 32)),
+                    Text(
+                      'Purpose',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
@@ -278,7 +281,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     SizedBox(height: 20),
                     Text(
                       'Available Equipments',
-                      style: TextStyle(fontSize: 32),
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                     SizedBox(height: 12),
                     Wrap(
