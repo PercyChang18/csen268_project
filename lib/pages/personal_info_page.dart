@@ -37,23 +37,24 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
   ];
 
   // Text editing controllers for the form fields
+  late final TextEditingController _nameController; // ADD THIS
   late final TextEditingController _weightController;
   late final TextEditingController _heightController;
   late final TextEditingController _ageController;
 
-  String? _userName;
-  String? _userEmail;
+  String?
+  _userEmail; // We will remove _userName since the controller will handle the name
 
   @override
   void initState() {
     super.initState();
     _currentUser = FirebaseAuth.instance.currentUser;
+    _nameController = TextEditingController(); // ADD THIS
     _weightController = TextEditingController();
     _heightController = TextEditingController();
     _ageController = TextEditingController();
 
     if (_currentUser != null) {
-      _userName = _currentUser!.displayName;
       _userEmail = _currentUser!.email;
       _loadAndSetUserProfile();
     } else {
@@ -64,7 +65,6 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
   Future<void> _loadAndSetUserProfile() async {
     try {
       DocumentSnapshot<Map<String, dynamic>> userDoc =
-          // NOTE: our data is stored in the collection 'users'
           await FirebaseFirestore.instance
               .collection('users')
               .doc(_currentUser!.uid)
@@ -73,13 +73,15 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
       if (userDoc.exists && userDoc.data() != null) {
         setState(() {
           _userProfile = UserProfile.fromFireStore(userDoc, null);
+          _nameController.text = _userProfile.name ?? ''; // ADD THIS
           _weightController.text = _userProfile.weight?.toString() ?? '';
           _heightController.text = _userProfile.height?.toString() ?? '';
           _ageController.text = _userProfile.age?.toString() ?? '';
         });
-      } else {}
+      }
     } on FirebaseException catch (e) {
       print("Error on getting data from Firestore: $e");
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load profile: ${e.message}')),
       );
@@ -88,6 +90,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
 
   @override
   void dispose() {
+    _nameController.dispose(); // ADD THIS
     _weightController.dispose();
     _heightController.dispose();
     _ageController.dispose();
@@ -115,13 +118,19 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        // TODO: we need to ask user's name
-                        _userName ?? 'User Card',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      // This Text widget can now listen to the controller for real-time updates if you want
+                      // For simplicity, we'll leave it, but the editable field below is the main focus.
+                      ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _nameController,
+                        builder: (context, value, child) {
+                          return Text(
+                            value.text.isNotEmpty ? value.text : 'User Card',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        },
                       ),
                       Text(
                         _userEmail ?? 'No Email',
@@ -141,6 +150,33 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       'Personal Information',
                       style: TextStyle(fontSize: 32),
                     ),
+                    const SizedBox(height: 12),
+                    // START: ADD NAME TEXTFORMFIELD
+                    SizedBox(
+                      width: 280,
+                      height: 60,
+                      child: TextFormField(
+                        controller: _nameController,
+                        keyboardType: TextInputType.name,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'[a-zA-Z\s]'),
+                          ),
+                        ],
+                        style: const TextStyle(color: Colors.white),
+                        decoration: const InputDecoration(labelText: 'Name'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your name';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _userProfile.name = value;
+                        },
+                      ),
+                    ),
+                    // END: ADD NAME TEXTFORMFIELD
                     const SizedBox(height: 12),
                     // Gender
                     SizedBox(
@@ -369,6 +405,8 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                             if (_formKey.currentState!.validate()) {
                               _formKey.currentState!.save();
                               // Update user profile with current controller values
+                              // The onSaved callbacks already handle this, but we can also be explicit
+                              // _userProfile.name is already set by onSaved
                               _userProfile.weight = double.tryParse(
                                 _weightController.text,
                               );
@@ -387,7 +425,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                                       .set(
                                         _userProfile.toFireStore(),
                                         SetOptions(merge: true),
-                                      ); // Use merge option
+                                      );
                                   if (!mounted) return;
 
                                   ScaffoldMessenger.of(context).showSnackBar(

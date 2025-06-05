@@ -27,7 +27,7 @@ class WorkoutCubit extends Cubit<WorkoutState> {
   final Set<int> _highWorkoutDays = {
     DateTime.tuesday,
     DateTime.wednesday,
-    DateTime.friday,
+    DateTime.thursday,
     DateTime.saturday,
   };
 
