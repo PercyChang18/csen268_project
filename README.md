@@ -13,7 +13,7 @@ Des
 
 ### Welcome Page
 - This page is only for first time users, which allows them to provide their information, purposes, and available equipments.
-<img src="images/welcome-page.png">
+<img src="images/welcome-page.png" style="width:500px; max-width:100%; height:auto;">
 
 ### Home Page
 - The home page of the app, which contains the following:
