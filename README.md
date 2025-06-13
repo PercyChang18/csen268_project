@@ -13,14 +13,14 @@ Des
 
 ### Welcome Page
 - This page is only for first time users, which allows them to provide their information, purposes, and available equipments.
-<img src="images/welcome-page.png" style="width:500px; max-width:100%; height:auto;">
+<img src="images/welcome-page.png" style="width:400px; max-width:100%; height:auto;">
 
 ### Home Page
 - The home page of the app, which contains the following:
     1. Tracking the total calories burned and minutes of workout each day.
     2. Assigned workouts based on user's preferences and available equipments.
     3. Bottom navigation bar to different pages.
-<img src="images/homepage.png">
+<img src="images/homepage.png" style="width:400px; max-width:100%; height:auto;">
 
 ### Workout page
 - Starting point of each individual workout, which has information about category, equipments that users can use for this workout, and description on how to setup and execute this exercies. 
@@ -31,12 +31,12 @@ Des
 
 ### Updated Home Page
 - Back to home page, the workout card will have a check mark indicates the workout is completed.
-<img src="images/homepage-1.png">
+<img src="images/homepage-1.png" style="width:400px; max-width:100%; height:auto;">
 
 ### Log Page
 - A log page allows users to keep track of their workout progress.
-<img src="images/log-page.png">
+<img src="images/log-page.png" style="width:400px; max-width:100%; height:auto;">
 
 ### Personal Information Page
 - Personal information page allows users to update their information, as well as preferences and available equipments. A logout button is provided for users to logout.
-<img src="images/personal-info.png">
+<img src="images/personal-info.png" style="width:400px; max-width:100%; height:auto;">
